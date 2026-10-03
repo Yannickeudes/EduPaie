@@ -48,7 +48,8 @@ def ajouter_paiement(
     eleve_id,
     montant,
     date_paiement,
-    mode_paiement
+    mode_paiement,
+    solde_apres_paiement
 ):
     connection.execute(
         """
@@ -58,16 +59,18 @@ def ajouter_paiement(
             eleve_id,
             montant,
             date_paiement,
-            mode_paiement
+            mode_paiement,
+            solde_apres_paiement
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
         (
             numero_recu,
             eleve_id,
             montant,
             date_paiement,
-            mode_paiement
+            mode_paiement,
+            solde_apres_paiement
         )
     )
 
@@ -197,7 +200,7 @@ def main():
             ids.append(eleve_id)
 
         paiements = [
-            # HONOU Koffi Kaleb - Soldé
+            # HONOU Koffi Karnel - Soldé
             (
                 "REC-2026-0001",
                 ids[0],
@@ -223,7 +226,6 @@ def main():
             ),
 
             # BENISSAN-TETEVI Dédé Josepha - Non payé
-            # Aucun paiement
 
             # NABEDE Gnimdou Yolande - Soldé
             (
@@ -241,7 +243,7 @@ def main():
                 "Chèque"
             ),
 
-            # ADJIGOU Adélodjou Félix - Partiellement payé
+            # ADIGOU Adélodjou Félix - Partiellement payé
             (
                 "REC-2026-0006",
                 ids[4],
@@ -275,8 +277,7 @@ def main():
                 "Espèces"
             ),
 
-            # TCHASSIM Eninam Grace - Non payé
-            # Aucun paiement
+            # TCHASSSIM Eninam Grace - Non payé
 
             # CAMARA Guy Mari Mohamed - Soldé
             (
@@ -321,8 +322,7 @@ def main():
                 "Mobile Money"
             ),
 
-            # LAWSON-ADJANYRAKU Nadou Glorie - Non payé
-            # Aucun paiement
+            # LAWSON ADJANYRAKU Nadou Glorie - Non payé
 
             # TOSSOUKPE Claire - Soldé
             (
@@ -343,10 +343,37 @@ def main():
             )
         ]
 
+        soldes = {}
+
         for paiement in paiements:
+            numero_recu = paiement[0]
+            eleve_id = paiement[1]
+            montant = paiement[2]
+            date_paiement = paiement[3]
+            mode_paiement = paiement[4]
+
+            if eleve_id not in soldes:
+                eleve = connection.execute(
+                    """
+                    SELECT montant_total
+                    FROM eleves
+                    WHERE id = ?
+                    """,
+                    (eleve_id,)
+                ).fetchone()
+
+                soldes[eleve_id] = eleve[0]
+
+            soldes[eleve_id] -= montant
+
             ajouter_paiement(
                 connection,
-                *paiement
+                numero_recu,
+                eleve_id,
+                montant,
+                date_paiement,
+                mode_paiement,
+                soldes[eleve_id]
             )
 
         connection.commit()

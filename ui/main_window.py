@@ -1,4 +1,3 @@
-
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -21,7 +20,8 @@ class MainWindow(QMainWindow):
         eleve_repository,
         paiement_service,
         dashboard_service,
-        eleve_service
+        eleve_service,
+        recu_service
     ):
         super().__init__()
 
@@ -30,6 +30,12 @@ class MainWindow(QMainWindow):
         )
 
         self.resize(1000, 650)
+
+        self.eleve_repository = eleve_repository
+        self.paiement_service = paiement_service
+        self.dashboard_service = dashboard_service
+        self.eleve_service = eleve_service
+        self.recu_service = recu_service
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -108,7 +114,8 @@ class MainWindow(QMainWindow):
         self.page_historique = HistoriquePage(
             eleve_repository,
             paiement_service.paiement_repository,
-            paiement_service
+            paiement_service,
+            recu_service
         )
 
         self.page_recus = RecusPage(

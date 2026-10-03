@@ -11,7 +11,8 @@ class PaiementRepository:
         eleve_id,
         montant,
         date_paiement,
-        mode_paiement
+        mode_paiement,
+        solde_apres_paiement
     ):
         query = """
             INSERT INTO paiements
@@ -20,9 +21,10 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """
 
         cursor = self.connection.execute(
@@ -32,11 +34,13 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             )
         )
 
         self.connection.commit()
+
         return cursor.lastrowid
 
     def lister(self):
@@ -47,12 +51,14 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             ORDER BY date_paiement DESC, id DESC
         """
 
         cursor = self.connection.execute(query)
+
         return cursor.fetchall()
 
     def lister_par_eleve(self, eleve_id):
@@ -63,7 +69,8 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             WHERE eleve_id = ?
             ORDER BY date_paiement ASC, id ASC
@@ -84,7 +91,8 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             WHERE numero_recu = ?
         """
@@ -104,7 +112,8 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             WHERE id = ?
         """

@@ -1,4 +1,3 @@
-
 import sys
 import sqlite3
 
@@ -9,54 +8,44 @@ from repositories.paiement_repository import PaiementRepository
 
 from services.paiement_service import PaiementService
 from services.eleve_service import EleveService
+from services.recu_service import RecuService
 from services.dashboard_service import DashboardService
 
 from ui.main_window import MainWindow
 
 
-# Connexion à la base de données
 connection = sqlite3.connect(
     "database/edupaie.db"
 )
 
-# Repositories
-eleve_repository = EleveRepository(
-    connection
-)
+eleve_repository = EleveRepository(connection)
+paiement_repository = PaiementRepository(connection)
 
-paiement_repository = PaiementRepository(
-    connection
-)
-
-# Service des paiements
 paiement_service = PaiementService(
     eleve_repository,
     paiement_repository
 )
 
-# Service des élèves
 eleve_service = EleveService(
     eleve_repository,
     paiement_service
 )
 
-# Service du tableau de bord
+recu_service = RecuService()
+
 dashboard_service = DashboardService(
     eleve_repository,
     paiement_service
 )
 
-# Application
-app = QApplication(
-    sys.argv
-)
+app = QApplication(sys.argv)
 
-# Fenêtre principale
 window = MainWindow(
     eleve_repository,
     paiement_service,
     dashboard_service,
-    eleve_service
+    eleve_service,
+    recu_service
 )
 
 window.show()

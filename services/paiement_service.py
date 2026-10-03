@@ -53,34 +53,7 @@ class PaiementService:
                 "Paiement introuvable."
             )
 
-        eleve_id = paiement[2]
-
-        eleve = (
-            self.eleve_repository
-            .trouver_par_id(eleve_id)
-        )
-
-        if eleve is None:
-            raise ValueError(
-                "Élève introuvable."
-            )
-
-        montant_total = eleve[5]
-
-        paiements = (
-            self.paiement_repository
-            .lister_par_eleve(eleve_id)
-        )
-
-        total_paye = 0
-
-        for paiement_actuel in paiements:
-            total_paye += paiement_actuel[3]
-
-            if paiement_actuel[0] == paiement_id:
-                break
-
-        return montant_total - total_paye
+        return paiement[6]
 
     def enregistrer_paiement(
         self,
@@ -104,12 +77,15 @@ class PaiementService:
                 "Le montant du paiement dépasse le solde restant."
             )
 
+        solde_apres_paiement = solde - montant
+
         return self.paiement_repository.ajouter(
             numero_recu,
             eleve_id,
             montant,
             date_paiement,
-            mode_paiement
+            mode_paiement,
+            solde_apres_paiement
         )
 
     def determiner_statut(self, eleve_id):
