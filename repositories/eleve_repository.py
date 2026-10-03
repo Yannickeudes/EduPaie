@@ -30,6 +30,16 @@ class EleveRepository:
         cursor = self.connection.execute(query)
         return cursor.fetchall()
 
+    def trouver_par_id(self, eleve_id):
+        query = """
+            SELECT id, nom, prenom, classe, annee_scolaire, montant_total
+            FROM eleves
+            WHERE id = ?
+        """
+
+        cursor = self.connection.execute(query, (eleve_id,))
+        return cursor.fetchone()
+
     def modifier(
         self,
         eleve_id,

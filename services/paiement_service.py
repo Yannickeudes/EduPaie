@@ -11,16 +11,15 @@ class PaiementService:
         return total_paye
 
     def calculer_solde(self, eleve_id):
-        eleves = self.eleve_repository.lister()
+        eleve = self.eleve_repository.trouver_par_id(eleve_id)
 
-        for eleve in eleves:
-            if eleve[0] == eleve_id:
-                montant_total = eleve[5]
-                total_paye = self.calculer_total_paye(eleve_id)
+        if eleve is None:
+            raise ValueError("Élève introuvable.")
 
-                return montant_total - total_paye
+        montant_total = eleve[5]
+        total_paye = self.calculer_total_paye(eleve_id)
 
-        raise ValueError("Élève introuvable.")
+        return montant_total - total_paye
 
     def enregistrer_paiement(
         self,
