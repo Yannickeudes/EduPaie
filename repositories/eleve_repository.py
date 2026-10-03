@@ -29,3 +29,27 @@ class EleveRepository:
 
         cursor = self.connection.execute(query)
         return cursor.fetchall()
+
+    def modifier(self, eleve_id, nom, prenom, classe, annee_scolaire, montant_total):
+        query = """
+            UPDATE eleves
+            SET nom = ?,
+                prenom = ?,
+                classe = ?,
+                annee_scolaire = ?,
+                montant_total = ?
+            WHERE id = ?
+        """
+
+        self.connection.execute(
+            query,
+            (nom, prenom, classe, annee_scolaire, montant_total, eleve_id)
+        )
+
+        self.connection.commit()
+
+    def supprimer(self, eleve_id):
+        query = "DELETE FROM eleves WHERE id = ?"
+
+        self.connection.execute(query, (eleve_id,))
+        self.connection.commit()
