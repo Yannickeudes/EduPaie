@@ -1,4 +1,3 @@
-
 import os
 
 from PySide6.QtWidgets import (
@@ -78,7 +77,9 @@ class HistoriquePage(QWidget):
             QTableWidget.EditTrigger.NoEditTriggers
         )
 
-        layout.addWidget(self.tableau)
+        layout.addWidget(
+            self.tableau
+        )
 
         # Boutons
         zone_boutons = QHBoxLayout()
@@ -115,6 +116,7 @@ class HistoriquePage(QWidget):
 
     def charger_eleves(self):
         self.select_eleve.blockSignals(True)
+
         self.select_eleve.clear()
 
         eleves = self.eleve_repository.lister()
@@ -147,15 +149,16 @@ class HistoriquePage(QWidget):
             return
 
         paiements = (
-            self.paiement_repository.lister_par_eleve(
-                eleve_id
-            )
+            self.paiement_repository
+            .lister_par_eleve(eleve_id)
         )
 
         for paiement in paiements:
             ligne = self.tableau.rowCount()
 
-            self.tableau.insertRow(ligne)
+            self.tableau.insertRow(
+                ligne
+            )
 
             self.tableau.setItem(
                 ligne,
@@ -208,13 +211,16 @@ class HistoriquePage(QWidget):
             )
             return
 
-        numero_recu = (
-            self.tableau.item(ligne, 0).text()
+        paiement_id = int(
+            self.tableau.item(
+                ligne,
+                4
+            ).text()
         )
 
         paiement = (
             self.paiement_repository
-            .trouver_par_numero_recu(numero_recu)
+            .trouver_par_id(paiement_id)
         )
 
         if paiement is None:
@@ -227,8 +233,9 @@ class HistoriquePage(QWidget):
 
         eleve_id = paiement[2]
 
-        eleve = self.eleve_repository.trouver_par_id(
-            eleve_id
+        eleve = (
+            self.eleve_repository
+            .trouver_par_id(eleve_id)
         )
 
         if eleve is None:
@@ -239,9 +246,12 @@ class HistoriquePage(QWidget):
             )
             return
 
+        # Solde correspondant au moment
+        # où ce paiement a été effectué
         solde_restant = (
-            self.paiement_service.calculer_solde(
-                eleve_id
+            self.paiement_service
+            .calculer_solde_apres_paiement(
+                paiement_id
             )
         )
 

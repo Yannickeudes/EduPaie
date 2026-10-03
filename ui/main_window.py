@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -19,7 +20,8 @@ class MainWindow(QMainWindow):
         self,
         eleve_repository,
         paiement_service,
-        dashboard_service
+        dashboard_service,
+        eleve_service
     ):
         super().__init__()
 
@@ -30,10 +32,7 @@ class MainWindow(QMainWindow):
         self.resize(1000, 650)
 
         central_widget = QWidget()
-
-        self.setCentralWidget(
-            central_widget
-        )
+        self.setCentralWidget(central_widget)
 
         layout_principal = QVBoxLayout(
             central_widget
@@ -46,9 +45,7 @@ class MainWindow(QMainWindow):
             "font-size: 28px; font-weight: bold;"
         )
 
-        layout_principal.addWidget(
-            titre
-        )
+        layout_principal.addWidget(titre)
 
         # Navigation
         self.bouton_dashboard = QPushButton(
@@ -99,7 +96,8 @@ class MainWindow(QMainWindow):
         )
 
         self.page_eleves = ElevesPage(
-            eleve_repository
+            eleve_repository,
+            eleve_service
         )
 
         self.page_paiements = PaiementsPage(
@@ -119,7 +117,6 @@ class MainWindow(QMainWindow):
             paiement_service
         )
 
-        # Ajout des pages
         self.pages.addWidget(
             self.page_dashboard
         )

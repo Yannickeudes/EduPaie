@@ -148,7 +148,9 @@ class RecusPage(QWidget):
 
         paiement = (
             self.paiement_repository
-            .trouver_par_numero_recu(numero_recu)
+            .trouver_par_numero_recu(
+                numero_recu
+            )
         )
 
         if paiement is None:
@@ -180,14 +182,19 @@ class RecusPage(QWidget):
             if eleve is None:
                 continue
 
+            # Solde historique après ce paiement
             solde = (
                 self.paiement_service
-                .calculer_solde(eleve_id)
+                .calculer_solde_apres_paiement(
+                    paiement[0]
+                )
             )
 
             ligne = self.tableau.rowCount()
 
-            self.tableau.insertRow(ligne)
+            self.tableau.insertRow(
+                ligne
+            )
 
             nom_complet = (
                 f"{eleve[1]} {eleve[2]}"
@@ -261,10 +268,12 @@ class RecusPage(QWidget):
             )
             return
 
+        # Solde historique correspondant
+        # à ce paiement
         solde = (
             self.paiement_service
-            .calculer_solde(
-                paiement[2]
+            .calculer_solde_apres_paiement(
+                paiement[0]
             )
         )
 

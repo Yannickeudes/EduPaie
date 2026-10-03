@@ -14,10 +14,15 @@ from PySide6.QtWidgets import (
 
 
 class ElevesPage(QWidget):
-    def __init__(self, eleve_repository):
+    def __init__(
+        self,
+        eleve_repository,
+        eleve_service
+    ):
         super().__init__()
 
         self.eleve_repository = eleve_repository
+        self.eleve_service = eleve_service
 
         layout = QVBoxLayout(self)
 
@@ -42,11 +47,30 @@ class ElevesPage(QWidget):
         self.champ_montant.setDecimals(0)
         self.champ_montant.setSuffix(" FCFA")
 
-        formulaire.addRow("Nom :", self.champ_nom)
-        formulaire.addRow("Prénom :", self.champ_prenom)
-        formulaire.addRow("Classe :", self.champ_classe)
-        formulaire.addRow("Année scolaire :", self.champ_annee)
-        formulaire.addRow("Montant total :", self.champ_montant)
+        formulaire.addRow(
+            "Nom :",
+            self.champ_nom
+        )
+
+        formulaire.addRow(
+            "Prénom :",
+            self.champ_prenom
+        )
+
+        formulaire.addRow(
+            "Classe :",
+            self.champ_classe
+        )
+
+        formulaire.addRow(
+            "Année scolaire :",
+            self.champ_annee
+        )
+
+        formulaire.addRow(
+            "Montant total :",
+            self.champ_montant
+        )
 
         layout.addLayout(formulaire)
 
@@ -59,12 +83,15 @@ class ElevesPage(QWidget):
             self.ajouter_eleve
         )
 
-        layout.addWidget(self.bouton_ajouter)
+        layout.addWidget(
+            self.bouton_ajouter
+        )
 
         # Recherche
         zone_recherche = QHBoxLayout()
 
         self.champ_recherche = QLineEdit()
+
         self.champ_recherche.setPlaceholderText(
             "Rechercher par nom, prénom ou classe..."
         )
@@ -85,12 +112,15 @@ class ElevesPage(QWidget):
             self.bouton_rechercher
         )
 
-        layout.addLayout(zone_recherche)
+        layout.addLayout(
+            zone_recherche
+        )
 
         # Filtre par classe
         zone_filtre = QHBoxLayout()
 
         self.champ_filtre_classe = QLineEdit()
+
         self.champ_filtre_classe.setPlaceholderText(
             "Exemple : Terminale A"
         )
@@ -123,10 +153,13 @@ class ElevesPage(QWidget):
             self.bouton_toutes_classes
         )
 
-        layout.addLayout(zone_filtre)
+        layout.addLayout(
+            zone_filtre
+        )
 
         # Tableau
         self.tableau = QTableWidget()
+
         self.tableau.setColumnCount(6)
 
         self.tableau.setHorizontalHeaderLabels([
@@ -142,7 +175,13 @@ class ElevesPage(QWidget):
             QTableWidget.EditTrigger.NoEditTriggers
         )
 
-        layout.addWidget(self.tableau)
+        self.tableau.itemSelectionChanged.connect(
+            self.charger_eleve_selectionne
+        )
+
+        layout.addWidget(
+            self.tableau
+        )
 
         # Boutons
         zone_boutons = QHBoxLayout()
@@ -183,7 +222,9 @@ class ElevesPage(QWidget):
             self.bouton_supprimer
         )
 
-        layout.addLayout(zone_boutons)
+        layout.addLayout(
+            zone_boutons
+        )
 
         self.charger_eleves()
 
@@ -224,29 +265,37 @@ class ElevesPage(QWidget):
             "L'élève a été ajouté avec succès."
         )
 
-        self.champ_nom.clear()
-        self.champ_prenom.clear()
-        self.champ_classe.clear()
-        self.champ_annee.clear()
-        self.champ_montant.setValue(0)
-
+        self.vider_formulaire()
         self.charger_eleves()
 
     def charger_eleves(self):
         eleves = self.eleve_repository.lister()
-        self.afficher_eleves(eleves)
+
+        self.afficher_eleves(
+            eleves
+        )
 
     def rechercher_eleves(self):
-        recherche = self.champ_recherche.text().strip()
+        recherche = (
+            self.champ_recherche
+            .text()
+            .strip()
+        )
 
         eleves = self.eleve_repository.rechercher(
             recherche=recherche
         )
 
-        self.afficher_eleves(eleves)
+        self.afficher_eleves(
+            eleves
+        )
 
     def filtrer_par_classe(self):
-        classe = self.champ_filtre_classe.text().strip()
+        classe = (
+            self.champ_filtre_classe
+            .text()
+            .strip()
+        )
 
         if not classe:
             QMessageBox.warning(
@@ -260,22 +309,77 @@ class ElevesPage(QWidget):
             classe=classe
         )
 
-        self.afficher_eleves(eleves)
+        self.afficher_eleves(
+            eleves
+        )
 
     def afficher_eleves(self, eleves):
+        self.tableau.blockSignals(True)
+
         self.tableau.setRowCount(0)
 
         for eleve in eleves:
             ligne = self.tableau.rowCount()
 
-            self.tableau.insertRow(ligne)
+            self.tableau.insertRow(
+                ligne
+            )
 
             for colonne, valeur in enumerate(eleve):
                 self.tableau.setItem(
                     ligne,
                     colonne,
-                    QTableWidgetItem(str(valeur))
+                    QTableWidgetItem(
+                        str(valeur)
+                    )
                 )
+
+        self.tableau.blockSignals(False)
+
+    def charger_eleve_selectionne(self):
+        ligne = self.tableau.currentRow()
+
+        if ligne < 0:
+            return
+
+        self.champ_nom.setText(
+            self.tableau.item(
+                ligne,
+                1
+            ).text()
+        )
+
+        self.champ_prenom.setText(
+            self.tableau.item(
+                ligne,
+                2
+            ).text()
+        )
+
+        self.champ_classe.setText(
+            self.tableau.item(
+                ligne,
+                3
+            ).text()
+        )
+
+        self.champ_annee.setText(
+            self.tableau.item(
+                ligne,
+                4
+            ).text()
+        )
+
+        montant = float(
+            self.tableau.item(
+                ligne,
+                5
+            ).text()
+        )
+
+        self.champ_montant.setValue(
+            montant
+        )
 
     def modifier_eleve(self):
         ligne = self.tableau.currentRow()
@@ -289,7 +393,10 @@ class ElevesPage(QWidget):
             return
 
         eleve_id = int(
-            self.tableau.item(ligne, 0).text()
+            self.tableau.item(
+                ligne,
+                0
+            ).text()
         )
 
         nom = self.champ_nom.text().strip()
@@ -298,38 +405,30 @@ class ElevesPage(QWidget):
         annee = self.champ_annee.text().strip()
         montant = self.champ_montant.value()
 
-        if not nom or not prenom or not classe or not annee:
+        try:
+            self.eleve_service.modifier_eleve(
+                eleve_id,
+                nom,
+                prenom,
+                classe,
+                annee,
+                montant
+            )
+
+            QMessageBox.information(
+                self,
+                "Succès",
+                "L'élève a été modifié avec succès."
+            )
+
+            self.charger_eleves()
+
+        except ValueError as erreur:
             QMessageBox.warning(
                 self,
-                "Validation",
-                "Veuillez remplir tous les champs."
+                "Modification refusée",
+                str(erreur)
             )
-            return
-
-        if montant <= 0:
-            QMessageBox.warning(
-                self,
-                "Validation",
-                "Le montant total doit être supérieur à 0."
-            )
-            return
-
-        self.eleve_repository.modifier(
-            eleve_id,
-            nom,
-            prenom,
-            classe,
-            annee,
-            montant
-        )
-
-        QMessageBox.information(
-            self,
-            "Succès",
-            "L'élève a été modifié avec succès."
-        )
-
-        self.charger_eleves()
 
     def supprimer_eleve(self):
         ligne = self.tableau.currentRow()
@@ -343,7 +442,10 @@ class ElevesPage(QWidget):
             return
 
         eleve_id = int(
-            self.tableau.item(ligne, 0).text()
+            self.tableau.item(
+                ligne,
+                0
+            ).text()
         )
 
         confirmation = QMessageBox.question(
@@ -352,9 +454,33 @@ class ElevesPage(QWidget):
             "Voulez-vous vraiment supprimer cet élève ?"
         )
 
-        if confirmation == QMessageBox.StandardButton.Yes:
-            self.eleve_repository.supprimer(
+        if confirmation != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            self.eleve_service.supprimer_eleve(
                 eleve_id
             )
 
+            QMessageBox.information(
+                self,
+                "Succès",
+                "L'élève a été supprimé avec succès."
+            )
+
+            self.vider_formulaire()
             self.charger_eleves()
+
+        except ValueError as erreur:
+            QMessageBox.warning(
+                self,
+                "Suppression refusée",
+                str(erreur)
+            )
+
+    def vider_formulaire(self):
+        self.champ_nom.clear()
+        self.champ_prenom.clear()
+        self.champ_classe.clear()
+        self.champ_annee.clear()
+        self.champ_montant.setValue(0)

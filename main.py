@@ -1,3 +1,4 @@
+
 import sys
 import sqlite3
 
@@ -7,6 +8,7 @@ from repositories.eleve_repository import EleveRepository
 from repositories.paiement_repository import PaiementRepository
 
 from services.paiement_service import PaiementService
+from services.eleve_service import EleveService
 from services.dashboard_service import DashboardService
 
 from ui.main_window import MainWindow
@@ -32,13 +34,19 @@ paiement_service = PaiementService(
     paiement_repository
 )
 
+# Service des élèves
+eleve_service = EleveService(
+    eleve_repository,
+    paiement_service
+)
+
 # Service du tableau de bord
 dashboard_service = DashboardService(
     eleve_repository,
     paiement_service
 )
 
-# Application PySide6
+# Application
 app = QApplication(
     sys.argv
 )
@@ -47,15 +55,14 @@ app = QApplication(
 window = MainWindow(
     eleve_repository,
     paiement_service,
-    dashboard_service
+    dashboard_service,
+    eleve_service
 )
 
 window.show()
 
-# Lancement
 exit_code = app.exec()
 
-# Fermeture de la connexion
 connection.close()
 
 sys.exit(exit_code)
