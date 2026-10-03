@@ -71,3 +71,19 @@ class PaiementRepository:
 
         cursor = self.connection.execute(query, (eleve_id,))
         return cursor.fetchall()
+
+    def trouver_par_numero_recu(self, numero_recu):
+        query = """
+            SELECT
+                id,
+                numero_recu,
+                eleve_id,
+                montant,
+                date_paiement,
+                mode_paiement
+            FROM paiements
+            WHERE numero_recu = ?
+        """
+
+        cursor = self.connection.execute(query, (numero_recu,))
+        return cursor.fetchone()
