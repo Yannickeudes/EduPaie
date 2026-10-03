@@ -5,34 +5,31 @@ from repositories.eleve_repository import EleveRepository
 connection = sqlite3.connect("database/edupaie.db")
 repository = EleveRepository(connection)
 
-# Ajouter
-eleve_id = repository.ajouter(
-    "TEST",
-    "Eleve",
-    "Terminale",
-    "2026-2027",
-    150000
-)
-
-print("Ajout :", eleve_id)
-
-# Modifier
-repository.modifier(
-    eleve_id,
-    "TEST-MODIFIE",
-    "Eleve",
+# Ajout de deux élèves de test
+id1 = repository.ajouter(
+    "DIALLO",
+    "Aminata",
     "Terminale A",
     "2026-2027",
-    175000
+    200000
 )
 
-print("Après modification :")
-print(repository.lister())
+id2 = repository.ajouter(
+    "KOFFI",
+    "Jean",
+    "Première A",
+    "2026-2027",
+    180000
+)
 
-# Supprimer
-repository.supprimer(eleve_id)
+print("Recherche DIALLO :")
+print(repository.rechercher("DIALLO"))
 
-print("Après suppression :")
-print(repository.lister())
+print("\nFiltre Terminale A :")
+print(repository.rechercher(classe="Terminale A"))
+
+# Nettoyage des données de test
+repository.supprimer(id1)
+repository.supprimer(id2)
 
 connection.close()

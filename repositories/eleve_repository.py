@@ -30,7 +30,15 @@ class EleveRepository:
         cursor = self.connection.execute(query)
         return cursor.fetchall()
 
-    def modifier(self, eleve_id, nom, prenom, classe, annee_scolaire, montant_total):
+    def modifier(
+        self,
+        eleve_id,
+        nom,
+        prenom,
+        classe,
+        annee_scolaire,
+        montant_total
+    ):
         query = """
             UPDATE eleves
             SET nom = ?,
@@ -43,7 +51,14 @@ class EleveRepository:
 
         self.connection.execute(
             query,
-            (nom, prenom, classe, annee_scolaire, montant_total, eleve_id)
+            (
+                nom,
+                prenom,
+                classe,
+                annee_scolaire,
+                montant_total,
+                eleve_id
+            )
         )
 
         self.connection.commit()
@@ -53,3 +68,24 @@ class EleveRepository:
 
         self.connection.execute(query, (eleve_id,))
         self.connection.commit()
+
+    def rechercher(self, recherche="", classe=""):
+        query = """
+            SELECT id, nom, prenom, classe, annee_scolaire, montant_total
+            FROM eleves
+            WHERE (nom LIKE ?
+                OR prenom LIKE ?
+                OR classe LIKE ?)
+            AND classe LIKE ?
+            ORDER BY nom, prenom
+        """
+
+        terme = f"%{recherche}%"
+        filtre_classe = f"%{classe}%"
+
+        cursor = self.connection.execute(
+            query,
+            (terme, terme, terme, filtre_classe)
+        )
+
+        return cursor.fetchall()
