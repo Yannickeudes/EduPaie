@@ -1,5 +1,5 @@
 import sys
-import sqlite3
+from database.database import initialiser_base
 
 from PySide6.QtWidgets import QApplication
 
@@ -14,9 +14,7 @@ from services.dashboard_service import DashboardService
 from ui.main_window import MainWindow
 
 
-connection = sqlite3.connect(
-    "database/edupaie.db"
-)
+connection = initialiser_base()
 
 eleve_repository = EleveRepository(connection)
 paiement_repository = PaiementRepository(connection)
