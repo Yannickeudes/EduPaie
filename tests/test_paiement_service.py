@@ -1,99 +1,181 @@
 import sqlite3
+import unittest
 
 from repositories.eleve_repository import EleveRepository
 from repositories.paiement_repository import PaiementRepository
 from services.paiement_service import PaiementService
 
 
-connection = sqlite3.connect("database/edupaie.db")
+class TestPaiementService(unittest.TestCase):
 
-eleve_repository = EleveRepository(connection)
-paiement_repository = PaiementRepository(connection)
+    def setUp(self):
+        self.connection = sqlite3.connect(":memory:")
 
-service = PaiementService(
-    eleve_repository,
-    paiement_repository
-)
+        self.connection.execute(
+            "PRAGMA foreign_keys = ON"
+        )
 
-# Élève de test
-eleve_id = eleve_repository.ajouter(
-    "TEST",
-    "Service",
-    "Terminale A",
-    "2026-2027",
-    200000
-)
+        self.connection.executescript("""
+            CREATE TABLE eleves (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nom TEXT NOT NULL,
+                prenom TEXT NOT NULL,
+                classe TEXT NOT NULL,
+                annee_scolaire TEXT NOT NULL,
+                montant_total REAL NOT NULL
+                    CHECK(montant_total >= 0)
+            );
 
-# Paiement normal
-service.enregistrer_paiement(
-    "REC-SERVICE-001",
-    eleve_id,
-    50000,
-    "2026-10-03",
-    "Mobile Money"
-)
+            CREATE TABLE paiements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero_recu TEXT NOT NULL UNIQUE,
+                eleve_id INTEGER NOT NULL,
+                montant REAL NOT NULL
+                    CHECK(montant > 0),
+                date_paiement TEXT NOT NULL,
+                mode_paiement TEXT NOT NULL
+                    CHECK (
+                        mode_paiement IN (
+                            'Espèces',
+                            'Chèque',
+                            'Virement',
+                            'Mobile Money'
+                        )
+                    ),
+                solde_apres_paiement REAL NOT NULL
+                    CHECK(solde_apres_paiement >= 0),
+                FOREIGN KEY (eleve_id)
+                    REFERENCES eleves(id)
+            );
+        """)
 
-print("Total payé :", service.calculer_total_paye(eleve_id))
-print("Solde restant :", service.calculer_solde(eleve_id))
+        self.eleve_repository = EleveRepository(
+            self.connection
+        )
 
-# Test d'un paiement supérieur au solde
-try:
-    service.enregistrer_paiement(
-        "REC-SERVICE-002",
-        eleve_id,
-        200000,
-        "2026-10-03",
-        "Espèces"
-    )
-except ValueError as erreur:
-    print("Paiement refusé :", erreur)
+        self.paiement_repository = PaiementRepository(
+            self.connection
+        )
 
-# Test du statut
-print("Statut après paiement :", service.determiner_statut(eleve_id))
-# Test du statut "Non payé"
-eleve_non_paye = eleve_repository.ajouter(
-    "TEST",
-    "NonPaye",
-    "Seconde",
-    "2026-2027",
-    100000
-)
+        self.service = PaiementService(
+            self.eleve_repository,
+            self.paiement_repository
+        )
 
-print(
-    "Statut élève non payé :",
-    service.determiner_statut(eleve_non_paye)
-)
+    def tearDown(self):
+        self.connection.close()
 
-# Test du statut "Soldé"
-eleve_solde = eleve_repository.ajouter(
-    "TEST",
-    "Solde",
-    "Première",
-    "2026-2027",
-    100000
-)
+    def test_paiement_normal(self):
+        eleve_id = self.eleve_repository.ajouter(
+            "TEST",
+            "Service",
+            "Terminale A",
+            "2026-2027",
+            200000
+        )
 
-service.enregistrer_paiement(
-    "REC-SERVICE-003",
-    eleve_solde,
-    100000,
-    "2026-10-03",
-    "Virement"
-)
+        self.service.enregistrer_paiement(
+            "REC-SERVICE-001",
+            eleve_id,
+            50000,
+            "2026-10-03",
+            "Mobile Money"
+        )
 
-print(
-    "Statut élève soldé :",
-    service.determiner_statut(eleve_solde)
-)
+        self.assertEqual(
+            self.service.calculer_total_paye(eleve_id),
+            50000
+        )
 
-# Nettoyage
-connection.execute(
-    "DELETE FROM paiements WHERE eleve_id = ?",
-    (eleve_id,)
-)
+        self.assertEqual(
+            self.service.calculer_solde(eleve_id),
+            150000
+        )
 
-connection.commit()
+    def test_paiement_superieur_au_solde(self):
+        eleve_id = self.eleve_repository.ajouter(
+            "TEST",
+            "Service",
+            "Terminale A",
+            "2026-2027",
+            200000
+        )
 
-eleve_repository.supprimer(eleve_id)
+        self.service.enregistrer_paiement(
+            "REC-SERVICE-001",
+            eleve_id,
+            50000,
+            "2026-10-03",
+            "Mobile Money"
+        )
 
-connection.close()
+        with self.assertRaises(ValueError):
+            self.service.enregistrer_paiement(
+                "REC-SERVICE-002",
+                eleve_id,
+                200000,
+                "2026-10-03",
+                "Espèces"
+            )
+
+    def test_statut_partiellement_paye(self):
+        eleve_id = self.eleve_repository.ajouter(
+            "TEST",
+            "Partiel",
+            "Terminale A",
+            "2026-2027",
+            200000
+        )
+
+        self.service.enregistrer_paiement(
+            "REC-SERVICE-001",
+            eleve_id,
+            50000,
+            "2026-10-03",
+            "Mobile Money"
+        )
+
+        self.assertEqual(
+            self.service.determiner_statut(eleve_id),
+            "Partiellement payé"
+        )
+
+    def test_statut_non_paye(self):
+        eleve_id = self.eleve_repository.ajouter(
+            "TEST",
+            "NonPaye",
+            "Seconde",
+            "2026-2027",
+            100000
+        )
+
+        self.assertEqual(
+            self.service.determiner_statut(eleve_id),
+            "Non payé"
+        )
+
+    def test_statut_solde(self):
+        eleve_id = self.eleve_repository.ajouter(
+            "TEST",
+            "Solde",
+            "Première",
+            "2026-2027",
+            100000
+        )
+
+        self.service.enregistrer_paiement(
+            "REC-SERVICE-001",
+            eleve_id,
+            100000,
+            "2026-10-03",
+            "Virement"
+        )
+
+        self.assertEqual(
+            self.service.determiner_statut(eleve_id),
+            "Soldé"
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,24 +1,57 @@
+import os
+import unittest
+
 from services.recu_service import RecuService
 
 
-service = RecuService()
+class TestRecuService(unittest.TestCase):
 
-eleve = (
-    1,
-    "DIALLO",
-    "Aminata",
-    "Terminale A",
-    "2026-2027",
-    200000
-)
+    def setUp(self):
+        self.service = RecuService()
 
-chemin = service.generer_recu(
-    "REC-TEST-PDF-001",
-    eleve,
-    50000,
-    "2026-10-03",
-    "Mobile Money",
-    150000
-)
+        self.eleve = (
+            1,
+            "DIALLO",
+            "Aminata",
+            "Terminale A",
+            "2026-2027",
+            200000
+        )
 
-print("Reçu généré :", chemin)
+        self.numero_recu = "REC-TEST-PDF-001"
+
+        self.chemin = (
+            f"receipts/{self.numero_recu}.pdf"
+        )
+
+    def tearDown(self):
+        if os.path.exists(self.chemin):
+            os.remove(self.chemin)
+
+    def test_generer_recu(self):
+        chemin = self.service.generer_recu(
+            self.numero_recu,
+            self.eleve,
+            50000,
+            "2026-10-03",
+            "Mobile Money",
+            150000
+        )
+
+        self.assertTrue(
+            os.path.exists(chemin)
+        )
+
+        self.assertGreater(
+            os.path.getsize(chemin),
+            0
+        )
+
+        self.assertEqual(
+            chemin,
+            self.chemin
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

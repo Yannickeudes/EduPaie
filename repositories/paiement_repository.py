@@ -11,7 +11,8 @@ class PaiementRepository:
         eleve_id,
         montant,
         date_paiement,
-        mode_paiement
+        mode_paiement,
+        solde_apres_paiement
     ):
         query = """
             INSERT INTO paiements
@@ -20,9 +21,10 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """
 
         cursor = self.connection.execute(
@@ -32,11 +34,13 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             )
         )
 
         self.connection.commit()
+
         return cursor.lastrowid
 
     def lister(self):
@@ -47,12 +51,14 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             ORDER BY date_paiement DESC, id DESC
         """
 
         cursor = self.connection.execute(query)
+
         return cursor.fetchall()
 
     def lister_par_eleve(self, eleve_id):
@@ -63,13 +69,18 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             WHERE eleve_id = ?
             ORDER BY date_paiement ASC, id ASC
         """
 
-        cursor = self.connection.execute(query, (eleve_id,))
+        cursor = self.connection.execute(
+            query,
+            (eleve_id,)
+        )
+
         return cursor.fetchall()
 
     def trouver_par_numero_recu(self, numero_recu):
@@ -80,10 +91,36 @@ class PaiementRepository:
                 eleve_id,
                 montant,
                 date_paiement,
-                mode_paiement
+                mode_paiement,
+                solde_apres_paiement
             FROM paiements
             WHERE numero_recu = ?
         """
 
-        cursor = self.connection.execute(query, (numero_recu,))
+        cursor = self.connection.execute(
+            query,
+            (numero_recu,)
+        )
+
+        return cursor.fetchone()
+
+    def trouver_par_id(self, paiement_id):
+        query = """
+            SELECT
+                id,
+                numero_recu,
+                eleve_id,
+                montant,
+                date_paiement,
+                mode_paiement,
+                solde_apres_paiement
+            FROM paiements
+            WHERE id = ?
+        """
+
+        cursor = self.connection.execute(
+            query,
+            (paiement_id,)
+        )
+
         return cursor.fetchone()
