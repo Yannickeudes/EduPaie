@@ -1,4 +1,5 @@
 import os
+import webbrowser
 
 from PySide6.QtWidgets import (
     QWidget,
@@ -289,7 +290,7 @@ class RecusPage(QWidget):
         )
 
         try:
-            os.startfile(
+            webbrowser.open(
                 os.path.abspath(chemin)
             )
 
