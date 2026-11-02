@@ -1,0 +1,41 @@
+name: Build EduPaie for Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name EduPaie --add-data "database;database" main.py
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: EduPaie-Windows
+          path: dist/EduPaie.exe
+          if-no-files-found: error
+          retention-days: 14
