@@ -218,6 +218,33 @@ QHeaderView::section {{
     border-bottom: 2px solid #BFDBFE;
 }}
 
+/* Onglets (page Aide) */
+QTabWidget::pane {{
+    border: 1px solid {COULEUR_BORDURE};
+    border-radius: 10px;
+    top: -1px;
+    background-color: #FFFFFF;
+}}
+
+QTabBar::tab {{
+    background-color: #E2E8F0;
+    color: #334155;
+    padding: 8px 20px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-right: 4px;
+}}
+
+QTabBar::tab:selected {{
+    background-color: {COULEUR_PRIMAIRE};
+    color: #FFFFFF;
+    font-weight: 600;
+}}
+
+QTabBar::tab:hover:!selected {{
+    background-color: #CBD5E1;
+}}
+
 /* Barres de défilement */
 QScrollBar:vertical {{
     background: transparent;

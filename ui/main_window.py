@@ -1,6 +1,4 @@
 import os
-import sys
-import webbrowser
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -10,7 +8,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
-    QMessageBox,
     QPushButton,
     QStackedWidget,
     QVBoxLayout,
@@ -23,6 +20,7 @@ from ui.paiements_page import PaiementsPage
 from ui.historique_page import HistoriquePage
 from ui.recus_page import RecusPage
 from ui.parametres_page import ParametresPage
+from ui.aide_page import AidePage
 from ui.theme import COULEUR_SIDEBAR
 
 
@@ -130,12 +128,15 @@ class MainWindow(QMainWindow):
             on_change=self.actualiser_image_de_marque
         )
 
+        self.page_aide = AidePage()
+
         self.pages.addWidget(self.page_dashboard)
         self.pages.addWidget(self.page_eleves)
         self.pages.addWidget(self.page_paiements)
         self.pages.addWidget(self.page_historique)
         self.pages.addWidget(self.page_recus)
         self.pages.addWidget(self.page_parametres)
+        self.pages.addWidget(self.page_aide)
 
         # Navigation
         self.groupe_boutons = QButtonGroup(self)
@@ -147,7 +148,8 @@ class MainWindow(QMainWindow):
             "Paiements",
             "Historique",
             "Reçus",
-            "Paramètres"
+            "Paramètres",
+            "Aide"
         ]
 
         for index, libelle in enumerate(libelles_pages):
@@ -177,7 +179,7 @@ class MainWindow(QMainWindow):
             Qt.CursorShape.PointingHandCursor
         )
         self.bouton_confidentialite.clicked.connect(
-            lambda: self.ouvrir_document(
+            lambda: self._ouvrir_aide(
                 "politique_confidentialite.html"
             )
         )
@@ -190,7 +192,7 @@ class MainWindow(QMainWindow):
             Qt.CursorShape.PointingHandCursor
         )
         self.bouton_documentation.clicked.connect(
-            lambda: self.ouvrir_document("documentation.html")
+            lambda: self._ouvrir_aide("documentation.html")
         )
 
         layout_panneau.addWidget(
@@ -246,59 +248,6 @@ class MainWindow(QMainWindow):
             " border-radius: 12px;"
         )
 
-    @staticmethod
-    def _chemin_document(nom_fichier):
-        candidats = []
-
-        if getattr(sys, "frozen", False):
-            # Documentation intégrée à l'exécutable
-            candidats.append(
-                os.path.join(
-                    getattr(sys, "_MEIPASS", ""),
-                    "docs",
-                    nom_fichier
-                )
-            )
-
-            # Documentation placée à côté de l'exe
-            candidats.append(
-                os.path.join(
-                    os.path.dirname(sys.executable),
-                    "docs",
-                    nom_fichier
-                )
-            )
-        else:
-            # Mode développement : dossier docs/ du projet
-            candidats.append(
-                os.path.join(
-                    os.path.dirname(
-                        os.path.dirname(
-                            os.path.abspath(__file__)
-                        )
-                    ),
-                    "docs",
-                    nom_fichier
-                )
-            )
-
-        for chemin in candidats:
-            if chemin and os.path.exists(chemin):
-                return chemin
-
-        return None
-
-    def ouvrir_document(self, nom_fichier):
-        chemin = self._chemin_document(nom_fichier)
-
-        if chemin is None:
-            QMessageBox.information(
-                self,
-                "Document introuvable",
-                "Le document demandé est introuvable."
-            )
-            return
-
-        webbrowser.open(
-            f"file:///{os.path.abspath(chemin)}"
-        )
+    def _ouvrir_aide(self, nom_fichier):
+        self.page_aide.afficher_nom(nom_fichier)
+        self.pages.setCurrentIndex(6)
