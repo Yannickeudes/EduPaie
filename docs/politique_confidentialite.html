@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité - EduPaie</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #0F172A;
+    background: #F1F5F9;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .carte {
+    max-width: 760px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 40px;
+  }
+  h1 { color: #2563EB; font-size: 26px; margin-top: 0; }
+  h2 { color: #1D4ED8; font-size: 18px; margin-top: 32px; }
+  p, li { line-height: 1.6; color: #334155; }
+  .bandeau {
+    background: #2563EB;
+    color: #FFFFFF;
+    border-radius: 12px 12px 0 0;
+    padding: 28px 40px;
+    margin: -40px -40px 32px -40px;
+  }
+  .bandeau h1 { color: #FFFFFF; margin: 0; }
+  .bandeau p { color: #DBEAFE; margin: 6px 0 0 0; }
+</style>
+</head>
+<body>
+<div class="carte">
+  <div class="bandeau">
+    <h1>Politique de confidentialité</h1>
+    <p>EduPaie - Gestion des paiements scolaires</p>
+  </div>
+
+  <p><em>Dernière mise à jour : novembre 2026</em></p>
+
+  <h2>1. Données collectées</h2>
+  <p>
+    EduPaie est une application de bureau qui enregistre localement,
+    sur l'ordinateur où elle est installée, les informations
+    nécessaires à la gestion des paiements scolaires :
+  </p>
+  <ul>
+    <li>Identité des élèves : nom, prénom, classe, année scolaire ;</li>
+    <li>Montant total attendu par élève ;</li>
+    <li>Historique des paiements : montant, date, mode de paiement,
+        numéro de reçu ;</li>
+    <li>Paramètres de l'établissement : nom et logo.</li>
+  </ul>
+
+  <h2>2. Stockage des données</h2>
+  <p>
+    Toutes les données sont conservées dans une base de données
+    SQLite locale (<strong>edupaie.db</strong>) située à côté de
+    l'application, ainsi que les reçus PDF dans le dossier
+    <strong>receipts/</strong>. Aucune donnée n'est envoyée sur
+    un serveur distant.
+  </p>
+
+  <h2>3. Utilisation des données</h2>
+  <p>
+    Les données servent uniquement au fonctionnement de
+    l'application : gestion des élèves, calcul des soldes,
+    génération des reçus et affichage des statistiques du
+    tableau de bord.
+  </p>
+
+  <h2>4. Partage et transmission</h2>
+  <p>
+    EduPaie ne transmet aucune donnée à des tiers. L'application
+    ne nécessite pas de connexion internet et n'intègre aucun
+    système de publicité ou de pistage.
+  </p>
+
+  <h2>5. Conservation et suppression</h2>
+  <p>
+    Les données restent sur l'ordinateur aussi longtemps que
+    l'application est utilisée. La suppression d'un élève ou
+    d'un paiement entraîne la suppression définitive des
+    données correspondantes dans la base locale.
+  </p>
+
+  <h2>6. Sécurité</h2>
+  <p>
+    L'accès aux données est limité au compte utilisateur de
+    l'ordinateur. Il est recommandé de sauvegarder régulièrement
+    le dossier contenant <strong>edupaie.db</strong> et
+    <strong>receipts/</strong>.
+  </p>
+
+  <h2>7. Vos droits</h2>
+  <p>
+    En tant qu'établissement, vous pouvez consulter, modifier
+    et supprimer les données des élèves à tout moment depuis
+    l'application. Pour toute question relative à cette
+    politique, contactez l'administrateur de l'établissement.
+  </p>
+</div>
+</body>
+</html>

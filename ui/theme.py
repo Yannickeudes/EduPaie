@@ -131,6 +131,22 @@ QPushButton#nav:hover {{
     color: #FFFFFF;
 }}
 
+/* Liens d'aide en bas de la barre latérale */
+QPushButton#lien {{
+    background-color: transparent;
+    color: #94A3B8;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    text-align: left;
+    font-size: 12px;
+}}
+
+QPushButton#lien:hover {{
+    background-color: #1E293B;
+    color: #FFFFFF;
+}}
+
 QPushButton#nav:checked {{
     background-color: {COULEUR_PRIMAIRE};
     color: #FFFFFF;

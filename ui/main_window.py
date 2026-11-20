@@ -1,4 +1,6 @@
 import os
+import sys
+import webbrowser
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -8,6 +10,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QStackedWidget,
     QVBoxLayout,
@@ -165,6 +168,38 @@ class MainWindow(QMainWindow):
 
         layout_panneau.addStretch()
 
+        # Liens d'aide en bas de la barre latérale
+        self.bouton_confidentialite = QPushButton(
+            "Politique de confidentialité"
+        )
+        self.bouton_confidentialite.setObjectName("lien")
+        self.bouton_confidentialite.setCursor(
+            Qt.CursorShape.PointingHandCursor
+        )
+        self.bouton_confidentialite.clicked.connect(
+            lambda: self.ouvrir_document(
+                "politique_confidentialite.html"
+            )
+        )
+
+        self.bouton_documentation = QPushButton(
+            "Documentation utilisateur"
+        )
+        self.bouton_documentation.setObjectName("lien")
+        self.bouton_documentation.setCursor(
+            Qt.CursorShape.PointingHandCursor
+        )
+        self.bouton_documentation.clicked.connect(
+            lambda: self.ouvrir_document("documentation.html")
+        )
+
+        layout_panneau.addWidget(
+            self.bouton_confidentialite
+        )
+        layout_panneau.addWidget(
+            self.bouton_documentation
+        )
+
         layout_principal.addWidget(panneau)
 
         # Zone de contenu
@@ -209,4 +244,61 @@ class MainWindow(QMainWindow):
             "font-size: 22px; font-weight: 700; color: #FFFFFF;"
             f" background-color: {self.parametres_service.couleur_badge()};"
             " border-radius: 12px;"
+        )
+
+    @staticmethod
+    def _chemin_document(nom_fichier):
+        candidats = []
+
+        if getattr(sys, "frozen", False):
+            # Documentation intégrée à l'exécutable
+            candidats.append(
+                os.path.join(
+                    getattr(sys, "_MEIPASS", ""),
+                    "docs",
+                    nom_fichier
+                )
+            )
+
+            # Documentation placée à côté de l'exe
+            candidats.append(
+                os.path.join(
+                    os.path.dirname(sys.executable),
+                    "docs",
+                    nom_fichier
+                )
+            )
+        else:
+            # Mode développement : dossier docs/ du projet
+            candidats.append(
+                os.path.join(
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.abspath(__file__)
+                        )
+                    ),
+                    "docs",
+                    nom_fichier
+                )
+            )
+
+        for chemin in candidats:
+            if chemin and os.path.exists(chemin):
+                return chemin
+
+        return None
+
+    def ouvrir_document(self, nom_fichier):
+        chemin = self._chemin_document(nom_fichier)
+
+        if chemin is None:
+            QMessageBox.information(
+                self,
+                "Document introuvable",
+                "Le document demandé est introuvable."
+            )
+            return
+
+        webbrowser.open(
+            f"file:///{os.path.abspath(chemin)}"
         )

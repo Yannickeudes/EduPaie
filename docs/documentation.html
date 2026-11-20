@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation utilisateur - EduPaie</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #0F172A;
+    background: #F1F5F9;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .carte {
+    max-width: 760px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 40px;
+  }
+  h1 { color: #2563EB; font-size: 26px; margin-top: 0; }
+  h2 { color: #1D4ED8; font-size: 18px; margin-top: 32px; }
+  p, li { line-height: 1.6; color: #334155; }
+  .bandeau {
+    background: #2563EB;
+    color: #FFFFFF;
+    border-radius: 12px 12px 0 0;
+    padding: 28px 40px;
+    margin: -40px -40px 32px -40px;
+  }
+  .bandeau h1 { color: #FFFFFF; margin: 0; }
+  .bandeau p { color: #DBEAFE; margin: 6px 0 0 0; }
+  code {
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="carte">
+  <div class="bandeau">
+    <h1>Documentation utilisateur</h1>
+    <p>EduPaie - Gestion des paiements scolaires</p>
+  </div>
+
+  <h2>1. Présentation</h2>
+  <p>
+    EduPaie est une application de bureau pour gérer les paiements
+    des élèves : inscription des élèves, enregistrement des
+    paiements, suivi des soldes, historique et reçus PDF.
+    Les données sont stockées localement sur l'ordinateur.
+  </p>
+
+  <h2>2. Navigation</h2>
+  <p>
+    La barre latérale à gauche donne accès aux six sections :
+  </p>
+  <ul>
+    <li><strong>Tableau de bord</strong> : indicateurs clés
+        (élèves, montants encaissés et restants, non soldés)
+        et liste des élèves filtrable par statut ;</li>
+    <li><strong>Élèves</strong> : ajout, modification,
+        suppression, recherche et filtre par classe ;</li>
+    <li><strong>Encaissement des paiements</strong> : choix de
+        l'élève, montant, date et mode de paiement ;</li>
+    <li><strong>Historique</strong> : paiements d'un élève et
+        réouverture des reçus ;</li>
+    <li><strong>Reçus</strong> : recherche et ouverture des
+        reçus PDF générés ;</li>
+    <li><strong>Paramètres</strong> : nom de l'établissement,
+        logo et couleur de marque.</li>
+  </ul>
+
+  <h2>3. Ajouter un élève</h2>
+  <ol>
+    <li>Ouvrez la section <strong>Élèves</strong> ;</li>
+    <li>Renseignez le nom, le prénom, la classe
+        (liste déroulante du système togolais, modifiable),
+        l'année scolaire et le montant total ;</li>
+    <li>Cliquez sur <strong>Ajouter l'élève</strong>.</li>
+  </ol>
+  <p>
+    Astuce : la touche <strong>Entrée</strong> dans le champ de
+    recherche lance directement la recherche.
+  </p>
+
+  <h2>4. Enregistrer un paiement</h2>
+  <ol>
+    <li>Ouvrez <strong>Encaissement des paiements</strong> ;</li>
+    <li>Sélectionnez l'élève : le solde restant s'affiche ;</li>
+    <li>Indiquez le montant, la date et le mode de paiement
+        (espèces, chèque, virement, mobile money) ;</li>
+    <li>Cliquez sur <strong>Enregistrer le paiement</strong> :
+        le reçu PDF est généré automatiquement.</li>
+  </ol>
+  <p>
+    Le statut de l'élève évolue automatiquement :
+    <em>Non payé</em>, <em>Partiellement payé</em> ou
+    <em>Soldé</em>.
+  </p>
+
+  <h2>5. Consulter et réimprimer un reçu</h2>
+  <p>
+    Depuis <strong>Historique</strong>, sélectionnez un élève
+    puis un paiement, ou depuis <strong>Reçus</strong>
+    recherchez le numéro de reçu (ex. REC-2026-0001).
+    Le bouton <strong>Ouvrir le reçu</strong> affiche le PDF.
+  </p>
+
+  <h2>6. Personnaliser l'application</h2>
+  <p>
+    Dans <strong>Paramètres</strong> vous pouvez :
+  </p>
+  <ul>
+    <li>Changer le <strong>nom de l'établissement</strong>
+        (affiché dans l'application et sur les reçus) ;</li>
+    <li>Ajouter le <strong>logo</strong> de l'école ;</li>
+    <li>Choisir la <strong>couleur de marque</strong>.</li>
+  </ul>
+
+  <h2>7. Sauvegarde des données</h2>
+  <p>
+    Les données se trouvent dans le dossier
+    <code>database/edupaie.db</code> et les reçus dans
+    <code>receipts/</code>, à côté de l'application.
+    Copiez ces dossiers pour sauvegarder ou transférer
+    l'application vers un autre poste.
+  </p>
+
+  <h2>8. Dépannage</h2>
+  <ul>
+    <li><strong>L'élève ne peut pas être supprimé</strong> :
+        des paiements sont déjà enregistrés pour lui ;</li>
+    <li><strong>Le montant dépasse le solde</strong> :
+        le paiement est refusé pour éviter les trop-perçus ;</li>
+    <li><strong>Un reçu est introuvable</strong> : vérifiez le
+        numéro dans la section Reçus.</li>
+  </ul>
+</div>
+</body>
+</html>

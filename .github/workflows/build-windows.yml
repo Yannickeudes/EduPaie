@@ -30,7 +30,7 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name EduPaie --add-data "database;database" main.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name EduPaie --add-data "database;database" --add-data "docs;docs" main.py
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
