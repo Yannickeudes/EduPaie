@@ -316,7 +316,8 @@ class RecusPage(QWidget):
                 paiement[5],
                 solde,
                 self.parametres_service.nom_ecole(),
-                self.parametres_service.chemin_logo()
+                self.parametres_service.chemin_logo(),
+                self.parametres_service.couleur_badge()
             )
         )
 

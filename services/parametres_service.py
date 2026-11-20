@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import time
 
@@ -7,6 +8,8 @@ from database.database import obtenir_chemin_base
 NOM_DEFAUT = "EduPaie"
 CLE_NOM_ECOLE = "nom_ecole"
 CLE_LOGO = "logo"
+CLE_COULEUR_BADGE = "couleur_badge"
+COULEUR_DEFAUT = "#2563EB"
 
 
 class ParametresService:
@@ -17,6 +20,12 @@ class ParametresService:
         return self.parametre_repository.obtenir(
             CLE_NOM_ECOLE,
             NOM_DEFAUT
+        )
+
+    def couleur_badge(self):
+        return self.parametre_repository.obtenir(
+            CLE_COULEUR_BADGE,
+            COULEUR_DEFAUT
         )
 
     def nom_fichier_logo(self):
@@ -51,7 +60,12 @@ class ParametresService:
 
         return None
 
-    def enregistrer(self, nom_ecole, chemin_logo_source=None):
+    def enregistrer(
+        self,
+        nom_ecole,
+        chemin_logo_source=None,
+        couleur=None
+    ):
         nom_ecole = nom_ecole.strip()
 
         if not nom_ecole:
@@ -63,6 +77,22 @@ class ParametresService:
             CLE_NOM_ECOLE,
             nom_ecole
         )
+
+        if couleur:
+            couleur = couleur.strip()
+
+            if not re.fullmatch(
+                r"#[0-9A-Fa-f]{6}", couleur
+            ):
+                raise ValueError(
+                    "Couleur invalide "
+                    "(format #RRGGBB attendu)."
+                )
+
+            self.parametre_repository.definir(
+                CLE_COULEUR_BADGE,
+                couleur.upper()
+            )
 
         if chemin_logo_source:
             nom_fichier_logo = self._copier_logo(

@@ -204,8 +204,9 @@ class MainWindow(QMainWindow):
                 return
 
         self.label_logo.setPixmap(QPixmap())
-        self.label_logo.setText("E")
+        self.label_logo.setText(nom_ecole[:1].upper())
         self.label_logo.setStyleSheet(
             "font-size: 22px; font-weight: 700; color: #FFFFFF;"
-            " background-color: #2563EB; border-radius: 12px;"
+            f" background-color: {self.parametres_service.couleur_badge()};"
+            " border-radius: 12px;"
         )

@@ -265,7 +265,8 @@ class HistoriquePage(QWidget):
                     paiement[5],
                     solde_restant,
                     self.parametres_service.nom_ecole(),
-                    self.parametres_service.chemin_logo()
+                    self.parametres_service.chemin_logo(),
+                    self.parametres_service.couleur_badge()
                 )
             )
 

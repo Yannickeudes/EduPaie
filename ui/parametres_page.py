@@ -1,8 +1,9 @@
 import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import (
+    QColorDialog,
     QFileDialog,
     QFormLayout,
     QFrame,
@@ -23,6 +24,7 @@ class ParametresPage(QWidget):
         self.parametres_service = parametres_service
         self.on_change = on_change
         self.chemin_logo_choisi = None
+        self.couleur_choisie = None
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -109,6 +111,26 @@ class ParametresPage(QWidget):
 
         layout_carte.addLayout(zone_logo)
 
+        # Couleur de la marque
+        zone_couleur = QHBoxLayout()
+        zone_couleur.setSpacing(10)
+
+        zone_couleur.addWidget(
+            QLabel("Couleur de la marque :")
+        )
+
+        self.bouton_couleur = QPushButton("Choisir...")
+        self.bouton_couleur.setObjectName("secondaire")
+        self.bouton_couleur.setFixedWidth(110)
+        self.bouton_couleur.clicked.connect(
+            self.choisir_couleur
+        )
+
+        zone_couleur.addWidget(self.bouton_couleur)
+        zone_couleur.addStretch()
+
+        layout_carte.addLayout(zone_couleur)
+
         # Bouton enregistrer
         zone_actions = QHBoxLayout()
         zone_actions.addStretch()
@@ -136,10 +158,22 @@ class ParametresPage(QWidget):
         )
 
         self.chemin_logo_choisi = None
+        self.couleur_choisie = None
 
         self._afficher_apercu(
             self.parametres_service.chemin_logo()
         )
+
+        self._appliquer_couleur(
+            self.parametres_service.couleur_badge()
+        )
+
+    def _appliquer_couleur(self, couleur):
+        self.bouton_couleur.setStyleSheet(
+            f"background-color: {couleur};"
+            " color: #FFFFFF; font-weight: 600;"
+        )
+        self.bouton_couleur.setText(couleur)
 
     def _afficher_apercu(self, chemin):
         if chemin and os.path.exists(chemin):
@@ -174,6 +208,24 @@ class ParametresPage(QWidget):
         self.chemin_logo_choisi = chemin
         self._afficher_apercu(chemin)
 
+    def choisir_couleur(self):
+        couleur_actuelle = (
+            self.couleur_choisie
+            or self.parametres_service.couleur_badge()
+        )
+
+        couleur = QColorDialog.getColor(
+            QColor(couleur_actuelle),
+            self,
+            "Couleur de la marque"
+        )
+
+        if not couleur.isValid():
+            return
+
+        self.couleur_choisie = couleur.name()
+        self._appliquer_couleur(self.couleur_choisie)
+
     def supprimer_logo(self):
         self.chemin_logo_choisi = ""
         self.parametres_service.supprimer_logo()
@@ -192,10 +244,12 @@ class ParametresPage(QWidget):
         try:
             self.parametres_service.enregistrer(
                 self.champ_nom_ecole.text(),
-                self.chemin_logo_choisi or None
+                self.chemin_logo_choisi or None,
+                self.couleur_choisie
             )
 
             self.chemin_logo_choisi = None
+            self.couleur_choisie = None
 
             if self.on_change:
                 self.on_change()

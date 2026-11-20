@@ -1,6 +1,6 @@
 import os
 
-from reportlab.lib.colors import HexColor
+from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -8,8 +8,6 @@ from reportlab.pdfgen import canvas
 
 
 # Palette EduPaie
-COULEUR_PRIMAIRE = HexColor("#2563EB")
-COULEUR_PRIMAIRE_FONCE = HexColor("#1D4ED8")
 COULEUR_SUCCES = HexColor("#16A34A")
 COULEUR_SUCCES_FOND = HexColor("#DCFCE7")
 COULEUR_TEXTE = HexColor("#0F172A")
@@ -18,6 +16,16 @@ COULEUR_BORDURE = HexColor("#E2E8F0")
 COULEUR_BLANC = HexColor("#FFFFFF")
 
 NOM_APPLICATION = "EduPaie"
+
+
+def _couleur(valeur, facteur=1.0):
+    valeur = valeur.lstrip("#")
+
+    rouge = min(int(valeur[0:2], 16) / 255 * facteur, 1.0)
+    vert = min(int(valeur[2:4], 16) / 255 * facteur, 1.0)
+    bleu = min(int(valeur[4:6], 16) / 255 * facteur, 1.0)
+
+    return Color(rouge, vert, bleu)
 
 
 class RecuService:
@@ -30,8 +38,11 @@ class RecuService:
         mode_paiement,
         solde_restant,
         nom_ecole=NOM_APPLICATION,
-        chemin_logo=None
+        chemin_logo=None,
+        couleur_primaire="#2563EB"
     ):
+        couleur = _couleur(couleur_primaire)
+        couleur_fonce = _couleur(couleur_primaire, 0.8)
         os.makedirs("receipts", exist_ok=True)
 
         chemin = f"receipts/{numero_recu}.pdf"
@@ -44,7 +55,7 @@ class RecuService:
 
         # Bandeau supérieur
         hauteur_bandeau = 42 * mm
-        c.setFillColor(COULEUR_PRIMAIRE)
+        c.setFillColor(couleur)
         c.rect(
             0,
             hauteur - hauteur_bandeau,
@@ -118,7 +129,7 @@ class RecuService:
         # Titre du document
         y = hauteur - hauteur_bandeau - 18 * mm
 
-        c.setFillColor(COULEUR_PRIMAIRE_FONCE)
+        c.setFillColor(couleur_fonce)
         c.setFont("Helvetica-Bold", 16)
         c.drawString(
             marge,
@@ -152,7 +163,7 @@ class RecuService:
 
         # Ligne d'accentuation
         y -= 4 * mm
-        c.setStrokeColor(COULEUR_PRIMAIRE)
+        c.setStrokeColor(couleur)
         c.setLineWidth(2)
         c.line(
             marge,
@@ -229,7 +240,7 @@ class RecuService:
         hauteur_encadre = 22 * mm
 
         c.setFillColor(HexColor("#EFF6FF"))
-        c.setStrokeColor(COULEUR_PRIMAIRE)
+        c.setStrokeColor(couleur)
         c.setLineWidth(1.5)
         c.roundRect(
             marge,
@@ -241,7 +252,7 @@ class RecuService:
             fill=1
         )
 
-        c.setFillColor(COULEUR_PRIMAIRE_FONCE)
+        c.setFillColor(couleur_fonce)
         c.setFont("Helvetica-Bold", 11)
         c.drawString(
             marge + 6 * mm,
