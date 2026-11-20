@@ -3,6 +3,7 @@ import os
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 
@@ -10,10 +11,13 @@ from reportlab.pdfgen import canvas
 COULEUR_PRIMAIRE = HexColor("#2563EB")
 COULEUR_PRIMAIRE_FONCE = HexColor("#1D4ED8")
 COULEUR_SUCCES = HexColor("#16A34A")
+COULEUR_SUCCES_FOND = HexColor("#DCFCE7")
 COULEUR_TEXTE = HexColor("#0F172A")
 COULEUR_TEXTE_ATENUE = HexColor("#64748B")
 COULEUR_BORDURE = HexColor("#E2E8F0")
-COULEUR_FOND_LIGNE = HexColor("#F1F5F9")
+COULEUR_BLANC = HexColor("#FFFFFF")
+
+NOM_APPLICATION = "EduPaie"
 
 
 class RecuService:
@@ -24,7 +28,9 @@ class RecuService:
         montant,
         date_paiement,
         mode_paiement,
-        solde_restant
+        solde_restant,
+        nom_ecole=NOM_APPLICATION,
+        chemin_logo=None
     ):
         os.makedirs("receipts", exist_ok=True)
 
@@ -48,21 +54,66 @@ class RecuService:
             fill=1
         )
 
-        c.setFillColor(HexColor("#FFFFFF"))
+        # Logo de l'établissement (si disponible)
+        x_nom = largeur / 2
+        largeur_logo = 0
 
-        c.setFont("Helvetica-Bold", 24)
-        c.drawCentredString(
-            largeur / 2,
-            hauteur - 20 * mm,
-            "EDUPAIE"
-        )
+        if chemin_logo and os.path.exists(chemin_logo):
+            try:
+                logo = ImageReader(chemin_logo)
+                largeur_logo, hauteur_logo = logo.getSize()
 
-        c.setFont("Helvetica", 10)
-        c.drawCentredString(
-            largeur / 2,
-            hauteur - 29 * mm,
-            "Gestion des paiements scolaires"
-        )
+                ratio = min(
+                    30 * mm / largeur_logo,
+                    30 * mm / hauteur_logo
+                )
+
+                largeur_affichee = largeur_logo * ratio
+                hauteur_affichee = hauteur_logo * ratio
+
+                c.drawImage(
+                    logo,
+                    marge,
+                    hauteur - hauteur_bandeau
+                    + (hauteur_bandeau - hauteur_affichee) / 2,
+                    width=largeur_affichee,
+                    height=hauteur_affichee,
+                    mask="auto"
+                )
+
+                largeur_logo = largeur_affichee + 8 * mm
+                x_nom = marge + largeur_affichee + 14 * mm
+            except Exception:
+                x_nom = largeur / 2
+                largeur_logo = 0
+
+        # Nom de l'établissement
+        c.setFillColor(COULEUR_BLANC)
+
+        if largeur_logo:
+            c.setFont("Helvetica-Bold", 16)
+            c.drawString(x_nom, hauteur - 19 * mm, nom_ecole)
+
+            c.setFont("Helvetica", 9)
+            c.drawString(
+                x_nom,
+                hauteur - 27 * mm,
+                "Reçu de paiement scolaire"
+            )
+        else:
+            c.setFont("Helvetica-Bold", 22)
+            c.drawCentredString(
+                largeur / 2,
+                hauteur - 19 * mm,
+                nom_ecole
+            )
+
+            c.setFont("Helvetica", 10)
+            c.drawCentredString(
+                largeur / 2,
+                hauteur - 28 * mm,
+                "Reçu de paiement scolaire"
+            )
 
         # Titre du document
         y = hauteur - hauteur_bandeau - 18 * mm
@@ -73,6 +124,30 @@ class RecuService:
             marge,
             y,
             "REÇU DE PAIEMENT"
+        )
+
+        # Badge PAYÉ
+        largeur_badge = 32 * mm
+        hauteur_badge = 10 * mm
+        y_badge = y - 3 * mm
+
+        c.setFillColor(COULEUR_SUCCES)
+        c.roundRect(
+            largeur - marge - largeur_badge,
+            y_badge - hauteur_badge,
+            largeur_badge,
+            hauteur_badge,
+            2 * mm,
+            stroke=0,
+            fill=1
+        )
+
+        c.setFillColor(COULEUR_BLANC)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawCentredString(
+            largeur - marge - largeur_badge / 2,
+            y_badge - hauteur_badge / 2 - 1.5 * mm,
+            "PAYÉ"
         )
 
         # Ligne d'accentuation
@@ -224,7 +299,8 @@ class RecuService:
         c.drawCentredString(
             largeur / 2,
             15 * mm,
-            "EduPaie - Reçu généré automatiquement"
+            f"{nom_ecole} - Reçu généré automatiquement "
+            f"par {NOM_APPLICATION}"
         )
 
         c.save()

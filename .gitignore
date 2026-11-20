@@ -4,3 +4,4 @@ receipts/
 build/
 dist/
 *.spec
+database/logos/

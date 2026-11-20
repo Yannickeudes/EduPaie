@@ -1,4 +1,7 @@
+import os
+
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
     QFrame,
@@ -16,6 +19,7 @@ from ui.eleves_page import ElevesPage
 from ui.paiements_page import PaiementsPage
 from ui.historique_page import HistoriquePage
 from ui.recus_page import RecusPage
+from ui.parametres_page import ParametresPage
 from ui.theme import COULEUR_SIDEBAR
 
 
@@ -26,7 +30,8 @@ class MainWindow(QMainWindow):
         paiement_service,
         dashboard_service,
         eleve_service,
-        recu_service
+        recu_service,
+        parametres_service
     ):
         super().__init__()
 
@@ -42,6 +47,7 @@ class MainWindow(QMainWindow):
         self.dashboard_service = dashboard_service
         self.eleve_service = eleve_service
         self.recu_service = recu_service
+        self.parametres_service = parametres_service
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -62,19 +68,27 @@ class MainWindow(QMainWindow):
         layout_panneau.setContentsMargins(16, 24, 16, 24)
         layout_panneau.setSpacing(6)
 
-        titre = QLabel("EduPaie")
-        titre.setStyleSheet(
-            "font-size: 26px; font-weight: 700; color: #FFFFFF;"
+        # Image de marque : logo + nom de l'établissement
+        self.label_logo = QLabel()
+        self.label_logo.setFixedSize(56, 56)
+        self.label_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.label_nom_ecole = QLabel("EduPaie")
+        self.label_nom_ecole.setStyleSheet(
+            "font-size: 18px; font-weight: 700; color: #FFFFFF;"
+        )
+        self.label_nom_ecole.setWordWrap(True)
+
+        self.label_sous_titre = QLabel("Paiements scolaires")
+        self.label_sous_titre.setStyleSheet(
+            "font-size: 11px; color: #94A3B8;"
         )
 
-        sous_titre = QLabel("Paiements scolaires")
-        sous_titre.setStyleSheet(
-            "font-size: 12px; color: #94A3B8;"
-        )
-
-        layout_panneau.addWidget(titre)
-        layout_panneau.addWidget(sous_titre)
-        layout_panneau.addSpacing(28)
+        layout_panneau.addWidget(self.label_logo)
+        layout_panneau.addSpacing(6)
+        layout_panneau.addWidget(self.label_nom_ecole)
+        layout_panneau.addWidget(self.label_sous_titre)
+        layout_panneau.addSpacing(22)
 
         # Pages
         self.pages = QStackedWidget()
@@ -97,13 +111,20 @@ class MainWindow(QMainWindow):
             eleve_repository,
             paiement_service.paiement_repository,
             paiement_service,
-            recu_service
+            recu_service,
+            parametres_service
         )
 
         self.page_recus = RecusPage(
             eleve_repository,
             paiement_service.paiement_repository,
-            paiement_service
+            paiement_service,
+            parametres_service
+        )
+
+        self.page_parametres = ParametresPage(
+            parametres_service,
+            on_change=self.actualiser_image_de_marque
         )
 
         self.pages.addWidget(self.page_dashboard)
@@ -111,6 +132,7 @@ class MainWindow(QMainWindow):
         self.pages.addWidget(self.page_paiements)
         self.pages.addWidget(self.page_historique)
         self.pages.addWidget(self.page_recus)
+        self.pages.addWidget(self.page_parametres)
 
         # Navigation
         self.groupe_boutons = QButtonGroup(self)
@@ -121,7 +143,8 @@ class MainWindow(QMainWindow):
             "Élèves",
             "Paiements",
             "Historique",
-            "Reçus"
+            "Reçus",
+            "Paramètres"
         ]
 
         for index, libelle in enumerate(libelles_pages):
@@ -153,4 +176,36 @@ class MainWindow(QMainWindow):
 
         layout_principal.addWidget(zone_contenu, 1)
 
+        self.actualiser_image_de_marque()
         self.statusBar().showMessage("Prêt")
+
+    def actualiser_image_de_marque(self):
+        nom_ecole = self.parametres_service.nom_ecole()
+
+        self.label_nom_ecole.setText(nom_ecole)
+        self.setWindowTitle(
+            f"{nom_ecole} - Paiements scolaires"
+        )
+
+        chemin_logo = self.parametres_service.chemin_logo()
+
+        if chemin_logo and os.path.exists(chemin_logo):
+            pixmap = QPixmap(chemin_logo)
+
+            if not pixmap.isNull():
+                self.label_logo.setPixmap(
+                    pixmap.scaled(
+                        48,
+                        48,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation
+                    )
+                )
+                return
+
+        self.label_logo.setPixmap(QPixmap())
+        self.label_logo.setText("E")
+        self.label_logo.setStyleSheet(
+            "font-size: 22px; font-weight: 700; color: #FFFFFF;"
+            " background-color: #2563EB; border-radius: 12px;"
+        )

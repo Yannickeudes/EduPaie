@@ -83,6 +83,17 @@ def initialiser_base():
         chemin_base
     )
 
+    # Table créée avec IF NOT EXISTS pour prendre en
+    # charge les bases existantes sans migration complète.
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS parametres (
+            cle TEXT PRIMARY KEY,
+            valeur TEXT
+        )
+        """
+    )
+
     if not base_existe:
         chemin_schema = obtenir_chemin_schema()
 

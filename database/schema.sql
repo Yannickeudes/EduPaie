@@ -19,3 +19,8 @@ CREATE TABLE paiements (
     solde_apres_paiement REAL NOT NULL CHECK(solde_apres_paiement >= 0),
     FOREIGN KEY (eleve_id) REFERENCES eleves(id)
 );
+
+CREATE TABLE IF NOT EXISTS parametres (
+    cle TEXT PRIMARY KEY,
+    valeur TEXT
+);

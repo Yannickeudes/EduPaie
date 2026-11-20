@@ -22,13 +22,15 @@ class RecusPage(QWidget):
         self,
         eleve_repository,
         paiement_repository,
-        paiement_service
+        paiement_service,
+        parametres_service
     ):
         super().__init__()
 
         self.eleve_repository = eleve_repository
         self.paiement_repository = paiement_repository
         self.paiement_service = paiement_service
+        self.parametres_service = parametres_service
 
         self.recu_service = RecuService()
 
@@ -312,7 +314,9 @@ class RecusPage(QWidget):
                 paiement[3],
                 paiement[4],
                 paiement[5],
-                solde
+                solde,
+                self.parametres_service.nom_ecole(),
+                self.parametres_service.chemin_logo()
             )
         )
 

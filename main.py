@@ -5,11 +5,13 @@ from PySide6.QtWidgets import QApplication
 
 from repositories.eleve_repository import EleveRepository
 from repositories.paiement_repository import PaiementRepository
+from repositories.parametre_repository import ParametreRepository
 
 from services.paiement_service import PaiementService
 from services.eleve_service import EleveService
 from services.recu_service import RecuService
 from services.dashboard_service import DashboardService
+from services.parametres_service import ParametresService
 
 from ui.main_window import MainWindow
 from ui.theme import appliquer_theme
@@ -37,6 +39,12 @@ dashboard_service = DashboardService(
     paiement_service
 )
 
+parametre_repository = ParametreRepository(connection)
+
+parametres_service = ParametresService(
+    parametre_repository
+)
+
 app = QApplication(sys.argv)
 appliquer_theme(app)
 
@@ -45,7 +53,8 @@ window = MainWindow(
     paiement_service,
     dashboard_service,
     eleve_service,
-    recu_service
+    recu_service,
+    parametres_service
 )
 
 window.show()

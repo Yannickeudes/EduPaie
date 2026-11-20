@@ -20,7 +20,8 @@ class HistoriquePage(QWidget):
         eleve_repository,
         paiement_repository,
         paiement_service,
-        recu_service
+        recu_service,
+        parametres_service
     ):
         super().__init__()
 
@@ -28,6 +29,7 @@ class HistoriquePage(QWidget):
         self.paiement_repository = paiement_repository
         self.paiement_service = paiement_service
         self.recu_service = recu_service
+        self.parametres_service = parametres_service
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -261,7 +263,9 @@ class HistoriquePage(QWidget):
                     paiement[3],
                     paiement[4],
                     paiement[5],
-                    solde_restant
+                    solde_restant,
+                    self.parametres_service.nom_ecole(),
+                    self.parametres_service.chemin_logo()
                 )
             )
 
