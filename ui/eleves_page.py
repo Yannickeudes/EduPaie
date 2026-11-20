@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QFormLayout,
+    QFrame,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -11,6 +12,8 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QDoubleSpinBox
 )
+
+from ui.theme import configurer_tableau
 
 
 class ElevesPage(QWidget):
@@ -25,16 +28,22 @@ class ElevesPage(QWidget):
         self.eleve_service = eleve_service
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
         # Titre
         titre = QLabel("Gestion des élèves")
-        titre.setStyleSheet(
-            "font-size: 22px; font-weight: bold;"
-        )
+        titre.setObjectName("titre")
 
         layout.addWidget(titre)
 
         # Formulaire
+        carte_formulaire = QFrame()
+        carte_formulaire.setObjectName("carte")
+
+        layout_carte = QVBoxLayout(carte_formulaire)
+        layout_carte.setContentsMargins(16, 16, 16, 16)
+
         formulaire = QFormLayout()
 
         self.champ_nom = QLineEdit()
@@ -72,20 +81,23 @@ class ElevesPage(QWidget):
             self.champ_montant
         )
 
-        layout.addLayout(formulaire)
+        layout_carte.addLayout(formulaire)
 
         # Bouton ajout
         self.bouton_ajouter = QPushButton(
             "Ajouter l'élève"
         )
+        self.bouton_ajouter.setObjectName("primaire")
 
         self.bouton_ajouter.clicked.connect(
             self.ajouter_eleve
         )
 
-        layout.addWidget(
+        layout_carte.addWidget(
             self.bouton_ajouter
         )
+
+        layout.addWidget(carte_formulaire)
 
         # Recherche
         zone_recherche = QHBoxLayout()
@@ -96,9 +108,14 @@ class ElevesPage(QWidget):
             "Rechercher par nom, prénom ou classe..."
         )
 
+        self.champ_recherche.returnPressed.connect(
+            self.rechercher_eleves
+        )
+
         self.bouton_rechercher = QPushButton(
             "Rechercher"
         )
+        self.bouton_rechercher.setObjectName("primaire")
 
         self.bouton_rechercher.clicked.connect(
             self.rechercher_eleves
@@ -125,9 +142,14 @@ class ElevesPage(QWidget):
             "Exemple : Terminale A"
         )
 
+        self.champ_filtre_classe.returnPressed.connect(
+            self.filtrer_par_classe
+        )
+
         self.bouton_filtrer = QPushButton(
             "Filtrer par classe"
         )
+        self.bouton_filtrer.setObjectName("secondaire")
 
         self.bouton_filtrer.clicked.connect(
             self.filtrer_par_classe
@@ -136,6 +158,7 @@ class ElevesPage(QWidget):
         self.bouton_toutes_classes = QPushButton(
             "Toutes les classes"
         )
+        self.bouton_toutes_classes.setObjectName("secondaire")
 
         self.bouton_toutes_classes.clicked.connect(
             self.charger_eleves
@@ -175,9 +198,18 @@ class ElevesPage(QWidget):
             QTableWidget.EditTrigger.NoEditTriggers
         )
 
+        configurer_tableau(self.tableau)
+
         self.tableau.itemSelectionChanged.connect(
             self.charger_eleve_selectionne
         )
+
+        self.label_compteur = QLabel("")
+        self.label_compteur.setStyleSheet(
+            "color: #64748B; font-size: 12px;"
+        )
+
+        layout.addWidget(self.label_compteur)
 
         layout.addWidget(
             self.tableau
@@ -189,6 +221,7 @@ class ElevesPage(QWidget):
         self.bouton_actualiser = QPushButton(
             "Actualiser"
         )
+        self.bouton_actualiser.setObjectName("secondaire")
 
         self.bouton_actualiser.clicked.connect(
             self.charger_eleves
@@ -197,6 +230,7 @@ class ElevesPage(QWidget):
         self.bouton_modifier = QPushButton(
             "Modifier"
         )
+        self.bouton_modifier.setObjectName("secondaire")
 
         self.bouton_modifier.clicked.connect(
             self.modifier_eleve
@@ -205,6 +239,7 @@ class ElevesPage(QWidget):
         self.bouton_supprimer = QPushButton(
             "Supprimer"
         )
+        self.bouton_supprimer.setObjectName("danger")
 
         self.bouton_supprimer.clicked.connect(
             self.supprimer_eleve
@@ -335,6 +370,11 @@ class ElevesPage(QWidget):
                 )
 
         self.tableau.blockSignals(False)
+
+        nombre = len(eleves)
+        self.label_compteur.setText(
+            f"{nombre} élève{'s' if nombre > 1 else ''}"
+        )
 
     def charger_eleve_selectionne(self):
         ligne = self.tableau.currentRow()

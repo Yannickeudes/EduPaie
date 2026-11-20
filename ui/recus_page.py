@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from services.recu_service import RecuService
+from ui.theme import configurer_tableau
 
 
 class RecusPage(QWidget):
@@ -32,12 +33,12 @@ class RecusPage(QWidget):
         self.recu_service = RecuService()
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
         # Titre
         titre = QLabel("Gestion des reçus")
-        titre.setStyleSheet(
-            "font-size: 22px; font-weight: bold;"
-        )
+        titre.setObjectName("titre")
 
         layout.addWidget(titre)
 
@@ -50,9 +51,14 @@ class RecusPage(QWidget):
             "Exemple : REC-2026-0001"
         )
 
+        self.champ_recherche.returnPressed.connect(
+            self.rechercher_recu
+        )
+
         self.bouton_rechercher = QPushButton(
             "Rechercher"
         )
+        self.bouton_rechercher.setObjectName("primaire")
 
         self.bouton_rechercher.clicked.connect(
             self.rechercher_recu
@@ -88,9 +94,18 @@ class RecusPage(QWidget):
             QTableWidget.EditTrigger.NoEditTriggers
         )
 
+        configurer_tableau(self.tableau)
+
         layout.addWidget(
             self.tableau
         )
+
+        self.label_compteur = QLabel("")
+        self.label_compteur.setStyleSheet(
+            "color: #64748B; font-size: 12px;"
+        )
+
+        layout.addWidget(self.label_compteur)
 
         # Boutons
         zone_boutons = QHBoxLayout()
@@ -98,6 +113,7 @@ class RecusPage(QWidget):
         self.bouton_tous = QPushButton(
             "Afficher tous les reçus"
         )
+        self.bouton_tous.setObjectName("secondaire")
 
         self.bouton_tous.clicked.connect(
             self.charger_tous_les_recus
@@ -106,6 +122,7 @@ class RecusPage(QWidget):
         self.bouton_ouvrir = QPushButton(
             "Ouvrir le reçu"
         )
+        self.bouton_ouvrir.setObjectName("primaire")
 
         self.bouton_ouvrir.clicked.connect(
             self.ouvrir_recu
@@ -172,6 +189,8 @@ class RecusPage(QWidget):
     def afficher_paiements(self, paiements):
         self.tableau.setRowCount(0)
 
+        nombre_affiches = 0
+
         for paiement in paiements:
             eleve_id = paiement[2]
 
@@ -182,6 +201,8 @@ class RecusPage(QWidget):
 
             if eleve is None:
                 continue
+
+            nombre_affiches += 1
 
             # Solde historique après ce paiement
             solde = (
@@ -220,6 +241,12 @@ class RecusPage(QWidget):
                         str(valeur)
                     )
                 )
+
+        self.label_compteur.setText(
+            f"{nombre_affiches} reçu"
+            f"{'s' if nombre_affiches > 1 else ''} affiché"
+            f"{'s' if nombre_affiches > 1 else ''}"
+        )
 
     def ouvrir_recu(self):
         ligne = self.tableau.currentRow()

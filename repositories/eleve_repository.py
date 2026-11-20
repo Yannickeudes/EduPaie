@@ -1,6 +1,3 @@
-import sqlite3
-
-
 class EleveRepository:
     def __init__(self, connection):
         self.connection = connection

@@ -12,6 +12,7 @@ from services.recu_service import RecuService
 from services.dashboard_service import DashboardService
 
 from ui.main_window import MainWindow
+from ui.theme import appliquer_theme
 
 
 connection = initialiser_base()
@@ -37,6 +38,7 @@ dashboard_service = DashboardService(
 )
 
 app = QApplication(sys.argv)
+appliquer_theme(app)
 
 window = MainWindow(
     eleve_repository,

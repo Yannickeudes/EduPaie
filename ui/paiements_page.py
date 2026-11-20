@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QFormLayout,
+    QFrame,
     QLabel,
     QComboBox,
     QDoubleSpinBox,
@@ -11,6 +12,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QMessageBox
 )
+
+from ui.theme import COULEUR_DANGER, COULEUR_SUCCES, COULEUR_TEXTE_ATENUE
 
 
 class PaiementsPage(QWidget):
@@ -25,13 +28,19 @@ class PaiementsPage(QWidget):
         self.paiement_service = paiement_service
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
         titre = QLabel("Enregistrement des paiements")
-        titre.setStyleSheet(
-            "font-size: 22px; font-weight: bold;"
-        )
+        titre.setObjectName("titre")
 
         layout.addWidget(titre)
+
+        carte_formulaire = QFrame()
+        carte_formulaire.setObjectName("carte")
+
+        layout_carte = QVBoxLayout(carte_formulaire)
+        layout_carte.setContentsMargins(16, 16, 16, 16)
 
         formulaire = QFormLayout()
 
@@ -85,7 +94,9 @@ class PaiementsPage(QWidget):
             self.select_mode
         )
 
-        layout.addLayout(formulaire)
+        layout_carte.addLayout(formulaire)
+
+        layout.addWidget(carte_formulaire)
 
         # Solde
         self.label_solde = QLabel(
@@ -93,7 +104,7 @@ class PaiementsPage(QWidget):
         )
 
         self.label_solde.setStyleSheet(
-            "font-size: 16px; font-weight: bold;"
+            f"font-size: 16px; font-weight: 700; color: {COULEUR_TEXTE_ATENUE};"
         )
 
         layout.addWidget(self.label_solde)
@@ -102,6 +113,7 @@ class PaiementsPage(QWidget):
         self.bouton_enregistrer = QPushButton(
             "Enregistrer le paiement"
         )
+        self.bouton_enregistrer.setObjectName("primaire")
 
         self.bouton_enregistrer.clicked.connect(
             self.enregistrer_paiement
@@ -149,11 +161,23 @@ class PaiementsPage(QWidget):
                 eleve_id
             )
 
+            couleur = (
+                COULEUR_SUCCES if solde <= 0 else COULEUR_TEXTE_ATENUE
+            )
+
+            self.label_solde.setStyleSheet(
+                f"font-size: 16px; font-weight: 700; color: {couleur};"
+            )
+
             self.label_solde.setText(
                 f"Solde restant : {solde:,.0f} FCFA"
             )
 
         except ValueError as erreur:
+            self.label_solde.setStyleSheet(
+                f"font-size: 16px; font-weight: 700; color: {COULEUR_DANGER};"
+            )
+
             self.label_solde.setText(
                 f"Erreur : {erreur}"
             )
@@ -217,11 +241,10 @@ class PaiementsPage(QWidget):
             )
 
     def generer_numero_recu(self):
-        paiements = self.paiement_service.paiement_repository.lister()
-
-        prochain_numero = len(paiements) + 1
+        annee = date.today().year
 
         return (
-            f"REC-{date.today().year}-"
-            f"{prochain_numero:04d}"
+            self.paiement_service
+            .paiement_repository
+            .prochain_numero(annee)
         )

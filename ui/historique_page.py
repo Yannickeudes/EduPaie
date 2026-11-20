@@ -1,3 +1,4 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -9,6 +10,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QMessageBox
 )
+
+from ui.theme import configurer_tableau
 
 
 class HistoriquePage(QWidget):
@@ -26,36 +29,47 @@ class HistoriquePage(QWidget):
         self.paiement_service = paiement_service
         self.recu_service = recu_service
 
-        self.setWindowTitle("Historique des paiements")
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
 
-        layout = QVBoxLayout()
-
+        # Titre
         titre = QLabel("Historique des paiements")
-        titre.setStyleSheet(
-            "font-size: 20px; font-weight: bold;"
-        )
+        titre.setObjectName("titre")
         layout.addWidget(titre)
 
+        # Sélection de l'élève
         ligne_selection = QHBoxLayout()
+        ligne_selection.setSpacing(10)
 
-        label_eleve = QLabel("Élève :")
+        ligne_selection.addWidget(
+            QLabel("Élève :")
+        )
 
         self.selection_eleve = QComboBox()
+        self.selection_eleve.setMinimumWidth(280)
 
         self.selection_eleve.currentIndexChanged.connect(
             self.charger_historique
         )
 
-        ligne_selection.addWidget(label_eleve)
-        ligne_selection.addWidget(
-            self.selection_eleve
+        ligne_selection.addWidget(self.selection_eleve)
+        ligne_selection.addStretch()
+
+        self.bouton_actualiser = QPushButton("Actualiser")
+        self.bouton_actualiser.setObjectName("secondaire")
+        self.bouton_actualiser.clicked.connect(
+            self.charger_historique
         )
+
+        ligne_selection.addWidget(self.bouton_actualiser)
 
         layout.addLayout(ligne_selection)
 
+        # Tableau
         self.tableau = QTableWidget()
 
-        self.tableau.setColumnCount(7)
+        self.tableau.setColumnCount(5)
 
         self.tableau.setHorizontalHeaderLabels(
             [
@@ -63,33 +77,33 @@ class HistoriquePage(QWidget):
                 "N° reçu",
                 "Montant",
                 "Mode",
-                "Solde restant",
-                "ID paiement",
-                "Élève"
+                "Solde restant"
             ]
         )
 
+        configurer_tableau(self.tableau)
         self.tableau.setEditTriggers(
             QTableWidget.NoEditTriggers
         )
 
-        self.tableau.setSelectionBehavior(
-            QTableWidget.SelectRows
-        )
-
         layout.addWidget(self.tableau)
+
+        # Bouton reçu
+        zone_boutons = QHBoxLayout()
+        zone_boutons.addStretch()
 
         self.bouton_recu = QPushButton(
             "Ouvrir le reçu"
         )
+        self.bouton_recu.setObjectName("primaire")
 
         self.bouton_recu.clicked.connect(
             self.ouvrir_recu
         )
 
-        layout.addWidget(self.bouton_recu)
+        zone_boutons.addWidget(self.bouton_recu)
 
-        self.setLayout(layout)
+        layout.addLayout(zone_boutons)
 
         self.charger_eleves()
 
@@ -135,14 +149,6 @@ class HistoriquePage(QWidget):
             .lister_par_eleve(eleve_id)
         )
 
-        eleve = (
-            self.eleve_repository
-            .trouver_par_id(eleve_id)
-        )
-
-        if eleve is None:
-            return
-
         self.tableau.setRowCount(
             len(paiements)
         )
@@ -163,66 +169,31 @@ class HistoriquePage(QWidget):
                 )
             )
 
-            self.tableau.setItem(
-                ligne,
-                0,
-                QTableWidgetItem(
-                    date_paiement
+            valeurs = [
+                date_paiement,
+                numero_recu,
+                f"{montant:,.0f} FCFA",
+                mode_paiement,
+                f"{solde_restant:,.0f} FCFA"
+            ]
+
+            for colonne, valeur in enumerate(valeurs):
+                item = QTableWidgetItem(str(valeur))
+
+                # L'ID du paiement est conservé
+                # dans les données de la première
+                # cellule de chaque ligne.
+                if colonne == 0:
+                    item.setData(
+                        Qt.ItemDataRole.UserRole,
+                        paiement_id
+                    )
+
+                self.tableau.setItem(
+                    ligne,
+                    colonne,
+                    item
                 )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                1,
-                QTableWidgetItem(
-                    numero_recu
-                )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                2,
-                QTableWidgetItem(
-                    f"{montant:,.0f} FCFA"
-                )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                3,
-                QTableWidgetItem(
-                    mode_paiement
-                )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                4,
-                QTableWidgetItem(
-                    f"{solde_restant:,.0f} FCFA"
-                )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                5,
-                QTableWidgetItem(
-                    str(paiement_id)
-                )
-            )
-
-            self.tableau.setItem(
-                ligne,
-                6,
-                QTableWidgetItem(
-                    f"{eleve[1]} {eleve[2]}"
-                )
-            )
-
-        self.tableau.hideColumn(5)
-        self.tableau.hideColumn(6)
-
-        self.tableau.resizeColumnsToContents()
 
     def ouvrir_recu(self):
         ligne = self.tableau.currentRow()
@@ -235,12 +206,17 @@ class HistoriquePage(QWidget):
             )
             return
 
-        paiement_id = int(
-            self.tableau.item(
-                ligne,
-                5
-            ).text()
-        )
+        item = self.tableau.item(ligne, 0)
+
+        paiement_id = item.data(Qt.ItemDataRole.UserRole)
+
+        if paiement_id is None:
+            QMessageBox.warning(
+                self,
+                "Erreur",
+                "Paiement introuvable."
+            )
+            return
 
         paiement = (
             self.paiement_repository

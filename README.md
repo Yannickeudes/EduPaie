@@ -20,6 +20,7 @@ Elle permet de gérer les élèves, enregistrer les paiements, suivre les soldes
 - Générer et réouvrir les reçus PDF
 - Consulter les statistiques du tableau de bord
 - Afficher les données de démonstration
+- Interface moderne avec thème coloré et barre latérale de navigation
 
 ## Technologies utilisées
 

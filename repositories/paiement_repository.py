@@ -1,6 +1,3 @@
-import sqlite3
-
-
 class PaiementRepository:
     def __init__(self, connection):
         self.connection = connection
@@ -82,6 +79,32 @@ class PaiementRepository:
         )
 
         return cursor.fetchall()
+
+    def prochain_numero(self, annee):
+        curseur = self.connection.execute(
+            """
+            SELECT numero_recu
+            FROM paiements
+            WHERE numero_recu LIKE ?
+            """,
+            (f"REC-{annee}-%",)
+        )
+
+        numeros = [
+            ligne[0] for ligne in curseur.fetchall()
+        ]
+
+        maximum = 0
+
+        for numero in numeros:
+            try:
+                suffixe = int(numero.rsplit("-", 1)[1])
+            except (ValueError, IndexError):
+                continue
+
+            maximum = max(maximum, suffixe)
+
+        return f"REC-{annee}-{maximum + 1:04d}"
 
     def trouver_par_numero_recu(self, numero_recu):
         query = """
