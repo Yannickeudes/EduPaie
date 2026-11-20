@@ -1,6 +1,7 @@
 import sys
 from database.database import initialiser_base
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QDialog
 
 from repositories.eleve_repository import EleveRepository
@@ -66,43 +67,65 @@ appliquer_theme(
     parametres_service.couleur_badge()
 )
 
-# Premier lancement : configuration des mots de passe
-if not auth_service.comptes_configures():
-    configuration = ConfigurationComptesDialog(
-        auth_service
-    )
+# La fenêtre peut être fermée sans quitter
+# l'application (déconnexion puis reconnexion)
+app.setQuitOnLastWindowClosed(False)
+
+
+def proposer_connexion():
+    # Premier lancement : configuration des mots de passe
+    if not auth_service.comptes_configures():
+        configuration = ConfigurationComptesDialog(
+            auth_service
+        )
+
+        if (
+            configuration.exec()
+            != QDialog.DialogCode.Accepted
+        ):
+            app.quit()
+            return
+
+    # Connexion
+    connexion = LoginDialog(auth_service)
 
     if (
-        configuration.exec()
+        connexion.exec()
         != QDialog.DialogCode.Accepted
     ):
-        connection.close()
-        sys.exit(0)
+        app.quit()
+        return
 
-# Connexion
-connexion = LoginDialog(auth_service)
+    ouvrir_fenetre(connexion.utilisateur)
 
-if (
-    connexion.exec()
-    != QDialog.DialogCode.Accepted
-):
-    connection.close()
-    sys.exit(0)
 
-utilisateur = connexion.utilisateur
+def ouvrir_fenetre(utilisateur):
+    fenetre = MainWindow(
+        eleve_repository,
+        paiement_service,
+        dashboard_service,
+        eleve_service,
+        recu_service,
+        parametres_service,
+        auth_service,
+        utilisateur
+    )
 
-window = MainWindow(
-    eleve_repository,
-    paiement_service,
-    dashboard_service,
-    eleve_service,
-    recu_service,
-    parametres_service,
-    auth_service,
-    utilisateur
-)
+    fenetre.deconnexion_demandee.connect(
+        lambda: fermer_et_reconnecter(fenetre)
+    )
 
-window.show()
+    fenetre.show()
+
+
+def fermer_et_reconnecter(fenetre):
+    fenetre.close()
+    fenetre.deleteLater()
+
+    proposer_connexion()
+
+
+QTimer.singleShot(0, proposer_connexion)
 
 exit_code = app.exec()
 

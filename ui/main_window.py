@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QStackedWidget,
     QVBoxLayout,
@@ -25,6 +26,8 @@ from ui.theme import COULEUR_SIDEBAR, actualiser_couleur
 
 
 class MainWindow(QMainWindow):
+    deconnexion_demandee = Signal()
+
     def __init__(
         self,
         eleve_repository,
@@ -208,6 +211,23 @@ class MainWindow(QMainWindow):
             self.bouton_documentation
         )
 
+        layout_panneau.addSpacing(10)
+
+        self.bouton_deconnexion = QPushButton(
+            "Se déconnecter"
+        )
+        self.bouton_deconnexion.setObjectName("lien")
+        self.bouton_deconnexion.setCursor(
+            Qt.CursorShape.PointingHandCursor
+        )
+        self.bouton_deconnexion.clicked.connect(
+            self.demander_deconnexion
+        )
+
+        layout_panneau.addWidget(
+            self.bouton_deconnexion
+        )
+
         layout_principal.addWidget(panneau)
 
         # Zone de contenu
@@ -263,3 +283,13 @@ class MainWindow(QMainWindow):
     def _ouvrir_aide(self, nom_fichier):
         self.page_aide.afficher_nom(nom_fichier)
         self.pages.setCurrentIndex(6)
+
+    def demander_deconnexion(self):
+        reponse = QMessageBox.question(
+            self,
+            "Déconnexion",
+            "Voulez-vous vraiment vous déconnecter ?"
+        )
+
+        if reponse == QMessageBox.StandardButton.Yes:
+            self.deconnexion_demandee.emit()
