@@ -83,13 +83,25 @@ def initialiser_base():
         chemin_base
     )
 
-    # Table créée avec IF NOT EXISTS pour prendre en
+    # Tables créées avec IF NOT EXISTS pour prendre en
     # charge les bases existantes sans migration complète.
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS parametres (
             cle TEXT PRIMARY KEY,
             valeur TEXT
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS utilisateurs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role TEXT NOT NULL UNIQUE,
+            nom TEXT NOT NULL,
+            mot_de_passe_hash TEXT NOT NULL,
+            sel TEXT NOT NULL
         )
         """
     )

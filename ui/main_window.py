@@ -32,7 +32,9 @@ class MainWindow(QMainWindow):
         dashboard_service,
         eleve_service,
         recu_service,
-        parametres_service
+        parametres_service,
+        auth_service,
+        utilisateur
     ):
         super().__init__()
 
@@ -49,6 +51,8 @@ class MainWindow(QMainWindow):
         self.eleve_service = eleve_service
         self.recu_service = recu_service
         self.parametres_service = parametres_service
+        self.auth_service = auth_service
+        self.utilisateur = utilisateur
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -125,6 +129,8 @@ class MainWindow(QMainWindow):
 
         self.page_parametres = ParametresPage(
             parametres_service,
+            auth_service,
+            utilisateur,
             on_change=self.actualiser_image_de_marque
         )
 
@@ -214,7 +220,9 @@ class MainWindow(QMainWindow):
         layout_principal.addWidget(zone_contenu, 1)
 
         self.actualiser_image_de_marque()
-        self.statusBar().showMessage("Prêt")
+        self.statusBar().showMessage(
+            f"Connecté : {utilisateur}"
+        )
 
     def actualiser_image_de_marque(self):
         couleur = self.parametres_service.couleur_badge()

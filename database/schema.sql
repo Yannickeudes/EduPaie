@@ -24,3 +24,11 @@ CREATE TABLE IF NOT EXISTS parametres (
     cle TEXT PRIMARY KEY,
     valeur TEXT
 );
+
+CREATE TABLE IF NOT EXISTS utilisateurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role TEXT NOT NULL UNIQUE,
+    nom TEXT NOT NULL,
+    mot_de_passe_hash TEXT NOT NULL,
+    sel TEXT NOT NULL
+);

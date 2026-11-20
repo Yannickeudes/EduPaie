@@ -18,10 +18,18 @@ from PySide6.QtWidgets import (
 
 
 class ParametresPage(QWidget):
-    def __init__(self, parametres_service, on_change=None):
+    def __init__(
+        self,
+        parametres_service,
+        auth_service=None,
+        utilisateur="",
+        on_change=None
+    ):
         super().__init__()
 
         self.parametres_service = parametres_service
+        self.auth_service = auth_service
+        self.utilisateur = utilisateur
         self.on_change = on_change
         self.chemin_logo_choisi = None
         self.couleur_choisie = None
@@ -148,9 +156,118 @@ class ParametresPage(QWidget):
         layout_carte.addLayout(zone_actions)
 
         layout.addWidget(carte)
+
+        # Carte sécurité : changement de mot de passe
+        if self.auth_service is not None:
+            self._construire_carte_securite(layout)
+
         layout.addStretch()
 
         self.charger_parametres()
+
+    def _construire_carte_securite(self, layout):
+        carte_securite = QFrame()
+        carte_securite.setObjectName("carte")
+
+        layout_carte = QVBoxLayout(carte_securite)
+        layout_carte.setContentsMargins(16, 16, 16, 16)
+        layout_carte.setSpacing(12)
+
+        titre_securite = QLabel("Sécurité")
+        titre_securite.setStyleSheet("font-weight: 600;")
+
+        layout_carte.addWidget(titre_securite)
+
+        layout_carte.addWidget(
+            QLabel(
+                f"Compte connecté : {self.utilisateur}"
+            )
+        )
+
+        formulaire = QFormLayout()
+
+        self.champ_mdp_actuel = QLineEdit()
+        self.champ_mdp_actuel.setEchoMode(
+            QLineEdit.EchoMode.Password
+        )
+
+        self.champ_nouveau_mdp = QLineEdit()
+        self.champ_nouveau_mdp.setEchoMode(
+            QLineEdit.EchoMode.Password
+        )
+
+        self.champ_confirmation_mdp = QLineEdit()
+        self.champ_confirmation_mdp.setEchoMode(
+            QLineEdit.EchoMode.Password
+        )
+
+        formulaire.addRow(
+            "Mot de passe actuel :",
+            self.champ_mdp_actuel
+        )
+        formulaire.addRow(
+            "Nouveau mot de passe :",
+            self.champ_nouveau_mdp
+        )
+        formulaire.addRow(
+            "Confirmer :",
+            self.champ_confirmation_mdp
+        )
+
+        layout_carte.addLayout(formulaire)
+
+        self.bouton_changer_mdp = QPushButton(
+            "Changer le mot de passe"
+        )
+        self.bouton_changer_mdp.setObjectName("secondaire")
+        self.bouton_changer_mdp.clicked.connect(
+            self.changer_mot_de_passe
+        )
+
+        layout_carte.addWidget(
+            self.bouton_changer_mdp
+        )
+
+        layout.addWidget(carte_securite)
+
+    def changer_mot_de_passe(self):
+        ancien = self.champ_mdp_actuel.text()
+        nouveau = self.champ_nouveau_mdp.text()
+        confirmation = self.champ_confirmation_mdp.text()
+
+        if nouveau != confirmation:
+            QMessageBox.warning(
+                self,
+                "Mot de passe",
+                "Les deux nouveaux mots de passe "
+                "ne correspondent pas."
+            )
+            return
+
+        try:
+            self.auth_service.changer_mot_de_passe(
+                self.utilisateur,
+                ancien,
+                nouveau
+            )
+
+            self.champ_mdp_actuel.clear()
+            self.champ_nouveau_mdp.clear()
+            self.champ_confirmation_mdp.clear()
+
+            QMessageBox.information(
+                self,
+                "Succès",
+                "Le mot de passe a été changé "
+                "avec succès."
+            )
+
+        except ValueError as erreur:
+            QMessageBox.warning(
+                self,
+                "Mot de passe refusé",
+                str(erreur)
+            )
 
     def charger_parametres(self):
         self.champ_nom_ecole.setText(
