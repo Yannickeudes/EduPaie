@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QLabel,
     QLineEdit,
+    QComboBox,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from ui.theme import configurer_tableau
+from ui.classes_togo import CLASSES_TOGO
 
 
 class ElevesPage(QWidget):
@@ -48,7 +50,9 @@ class ElevesPage(QWidget):
 
         self.champ_nom = QLineEdit()
         self.champ_prenom = QLineEdit()
-        self.champ_classe = QLineEdit()
+        self.champ_classe = QComboBox()
+        self.champ_classe.setEditable(True)
+        self.champ_classe.addItems(CLASSES_TOGO)
         self.champ_annee = QLineEdit()
 
         self.champ_montant = QDoubleSpinBox()
@@ -396,7 +400,7 @@ class ElevesPage(QWidget):
             ).text()
         )
 
-        self.champ_classe.setText(
+        self.champ_classe.setCurrentText(
             self.tableau.item(
                 ligne,
                 3
@@ -521,6 +525,6 @@ class ElevesPage(QWidget):
     def vider_formulaire(self):
         self.champ_nom.clear()
         self.champ_prenom.clear()
-        self.champ_classe.clear()
+        self.champ_classe.setCurrentText("")
         self.champ_annee.clear()
         self.champ_montant.setValue(0)
