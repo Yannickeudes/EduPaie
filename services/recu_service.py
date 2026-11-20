@@ -53,6 +53,15 @@ class RecuService:
         marge = 25 * mm
         largeur_disponible = largeur - 2 * marge
 
+        # Filigrane : logo de l'établissement
+        # en fond, très discret
+        self._dessiner_filigrane(
+            c,
+            largeur,
+            hauteur,
+            chemin_logo
+        )
+
         # Bandeau supérieur
         hauteur_bandeau = 42 * mm
         c.setFillColor(couleur)
@@ -317,3 +326,70 @@ class RecuService:
         c.save()
 
         return chemin
+
+    @staticmethod
+    def _dessiner_filigrane(
+        c,
+        largeur,
+        hauteur,
+        chemin_logo
+    ):
+        if not chemin_logo or not os.path.exists(
+            chemin_logo
+        ):
+            return
+
+        try:
+            import io
+
+            from PIL import Image
+
+            img = Image.open(
+                chemin_logo
+            ).convert("RGBA")
+
+            blanc = Image.new(
+                "RGBA",
+                img.size,
+                (255, 255, 255, 255)
+            )
+
+            img = Image.alpha_composite(
+                blanc,
+                img
+            ).convert("RGB")
+
+            # Le logo est fortement éclairci
+            # pour rester en filigrane
+            img = Image.blend(
+                Image.new("RGB", img.size, (255, 255, 255)),
+                img,
+                0.15
+            )
+
+            tampon = io.BytesIO()
+            img.save(tampon, format="PNG")
+            tampon.seek(0)
+
+            lecteur = ImageReader(tampon)
+            largeur_img, hauteur_img = lecteur.getSize()
+
+            cible = 150 * mm
+            ratio = min(
+                cible / largeur_img,
+                cible / hauteur_img
+            )
+
+            largeur_affichee = largeur_img * ratio
+            hauteur_affichee = hauteur_img * ratio
+
+            c.drawImage(
+                lecteur,
+                (largeur - largeur_affichee) / 2,
+                (hauteur - hauteur_affichee) / 2,
+                width=largeur_affichee,
+                height=hauteur_affichee
+            )
+
+        except Exception:
+            pass

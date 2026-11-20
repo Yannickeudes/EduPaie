@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
 
 # Palette EduPaie
 COULEUR_PRIMAIRE = "#2563EB"
-COULEUR_PRIMAIRE_FONCE = "#1D4ED8"
 COULEUR_SUCCES = "#16A34A"
 COULEUR_ATTENTION = "#D97706"
 COULEUR_DANGER = "#DC2626"
@@ -25,7 +24,51 @@ COULEURS_STATUT = {
     "Non payé": COULEUR_DANGER,
 }
 
-STYLE_GLOBAL = f"""
+_APPLICATION = None
+
+
+def _vers_rgb(hexa):
+    hexa = hexa.lstrip("#")
+    return (
+        int(hexa[0:2], 16),
+        int(hexa[2:4], 16),
+        int(hexa[4:6], 16),
+    )
+
+
+def _hex(rouge, vert, bleu):
+    return "#{:02X}{:02X}{:02X}".format(
+        max(0, min(255, int(rouge))),
+        max(0, min(255, int(vert))),
+        max(0, min(255, int(bleu))),
+    )
+
+
+def _fonce(hexa, facteur):
+    r, v, b = _vers_rgb(hexa)
+    return _hex(r * facteur, v * facteur, b * facteur)
+
+
+def _clair(hexa, facteur):
+    # Mélange avec le blanc : facteur = part de blanc (0 à 1)
+    r, v, b = _vers_rgb(hexa)
+    return _hex(
+        r + (255 - r) * facteur,
+        v + (255 - v) * facteur,
+        b + (255 - b) * facteur,
+    )
+
+
+def stylesheet(couleur_primaire=COULEUR_PRIMAIRE):
+    primaire = couleur_primaire
+    primaire_fonce = _fonce(couleur_primaire, 0.85)
+    primaire_fonce2 = _fonce(couleur_primaire, 0.7)
+    primaire_clair = _clair(couleur_primaire, 0.93)
+    selection = _clair(couleur_primaire, 0.88)
+    bordure_claire = _clair(couleur_primaire, 0.78)
+    accent_fonce = _fonce(couleur_primaire, 0.55)
+
+    return f"""
 QWidget {{
     background-color: {COULEUR_FOND};
     color: {COULEUR_TEXTE};
@@ -80,28 +123,28 @@ QPushButton:disabled {{
 }}
 
 QPushButton#primaire {{
-    background-color: {COULEUR_PRIMAIRE};
+    background-color: {primaire};
     color: #FFFFFF;
     border: none;
     font-weight: 600;
 }}
 
 QPushButton#primaire:hover {{
-    background-color: {COULEUR_PRIMAIRE_FONCE};
+    background-color: {primaire_fonce};
 }}
 
 QPushButton#primaire:pressed {{
-    background-color: #1E40AF;
+    background-color: {primaire_fonce2};
 }}
 
 QPushButton#secondaire {{
     background-color: #FFFFFF;
-    color: {COULEUR_PRIMAIRE};
-    border: 1px solid {COULEUR_PRIMAIRE};
+    color: {primaire};
+    border: 1px solid {primaire};
 }}
 
 QPushButton#secondaire:hover {{
-    background-color: #EFF6FF;
+    background-color: {primaire_clair};
 }}
 
 QPushButton#danger {{
@@ -148,7 +191,7 @@ QPushButton#lien:hover {{
 }}
 
 QPushButton#nav:checked {{
-    background-color: {COULEUR_PRIMAIRE};
+    background-color: {primaire};
     color: #FFFFFF;
     font-weight: 600;
 }}
@@ -162,20 +205,20 @@ QDateEdit {{
     border: 1px solid #CBD5E1;
     border-radius: 8px;
     padding: 6px 10px;
-    selection-background-color: #BFDBFE;
+    selection-background-color: {selection};
 }}
 
 QLineEdit:focus,
 QComboBox:focus,
 QDoubleSpinBox:focus,
 QDateEdit:focus {{
-    border: 1px solid {COULEUR_PRIMAIRE};
+    border: 1px solid {primaire};
 }}
 
 QComboBox QAbstractItemView {{
     background-color: #FFFFFF;
     border: 1px solid {COULEUR_BORDURE};
-    selection-background-color: #DBEAFE;
+    selection-background-color: {selection};
     selection-color: {COULEUR_TEXTE};
     outline: none;
 }}
@@ -197,7 +240,7 @@ QTableWidget {{
     border: 1px solid {COULEUR_BORDURE};
     border-radius: 10px;
     gridline-color: #EEF2F7;
-    selection-background-color: #DBEAFE;
+    selection-background-color: {selection};
     selection-color: {COULEUR_TEXTE};
 }}
 
@@ -210,12 +253,12 @@ QTableWidget::item:alternate {{
 }}
 
 QHeaderView::section {{
-    background-color: #EFF6FF;
-    color: #1E3A8A;
+    background-color: {primaire_clair};
+    color: {accent_fonce};
     font-weight: 600;
     padding: 8px;
     border: none;
-    border-bottom: 2px solid #BFDBFE;
+    border-bottom: 2px solid {bordure_claire};
 }}
 
 /* Onglets (page Aide) */
@@ -236,7 +279,7 @@ QTabBar::tab {{
 }}
 
 QTabBar::tab:selected {{
-    background-color: {COULEUR_PRIMAIRE};
+    background-color: {primaire};
     color: #FFFFFF;
     font-weight: 600;
 }}
@@ -297,9 +340,22 @@ QStatusBar {{
 """
 
 
-def appliquer_theme(application):
+def appliquer_theme(application, couleur_primaire=None):
+    global _APPLICATION
+
+    _APPLICATION = application
+
     application.setStyle("Fusion")
-    application.setStyleSheet(STYLE_GLOBAL)
+    application.setStyleSheet(
+        stylesheet(couleur_primaire or COULEUR_PRIMAIRE)
+    )
+
+
+def actualiser_couleur(couleur_primaire):
+    if _APPLICATION is not None:
+        _APPLICATION.setStyleSheet(
+            stylesheet(couleur_primaire)
+        )
 
 
 def configurer_tableau(tableau: QTableWidget):

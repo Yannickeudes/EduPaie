@@ -46,7 +46,10 @@ parametres_service = ParametresService(
 )
 
 app = QApplication(sys.argv)
-appliquer_theme(app)
+appliquer_theme(
+    app,
+    parametres_service.couleur_badge()
+)
 
 window = MainWindow(
     eleve_repository,

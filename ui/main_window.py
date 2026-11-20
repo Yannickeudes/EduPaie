@@ -21,7 +21,7 @@ from ui.historique_page import HistoriquePage
 from ui.recus_page import RecusPage
 from ui.parametres_page import ParametresPage
 from ui.aide_page import AidePage
-from ui.theme import COULEUR_SIDEBAR
+from ui.theme import COULEUR_SIDEBAR, actualiser_couleur
 
 
 class MainWindow(QMainWindow):
@@ -217,6 +217,10 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Prêt")
 
     def actualiser_image_de_marque(self):
+        couleur = self.parametres_service.couleur_badge()
+
+        actualiser_couleur(couleur)
+
         nom_ecole = self.parametres_service.nom_ecole()
 
         self.label_nom_ecole.setText(nom_ecole)
@@ -244,7 +248,7 @@ class MainWindow(QMainWindow):
         self.label_logo.setText(nom_ecole[:1].upper())
         self.label_logo.setStyleSheet(
             "font-size: 22px; font-weight: 700; color: #FFFFFF;"
-            f" background-color: {self.parametres_service.couleur_badge()};"
+            f" background-color: {couleur};"
             " border-radius: 12px;"
         )
 
